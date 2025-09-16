@@ -10,4 +10,9 @@ class FoodCategory extends Model
         'name',
         'image'
     ];
+
+    public function item()
+    {
+        return $this->hasMany(FoodItem::class);
+    }
 }
