@@ -22,7 +22,6 @@ type Props = {
 };
 
 export default function AllFoodItems({ ItemsPagination, categories }: Props) {
-    console.log(ItemsPagination);
     const [onCreateModalOpen, setOnCreateModalOpen] = useState<boolean>(false);
     return (
         <AdminSidebarLayout breadcrumbs={breadcrumbs}>
@@ -39,7 +38,7 @@ export default function AllFoodItems({ ItemsPagination, categories }: Props) {
                 {/* List all Category */}
                 <section>
                     {ItemsPagination.data.length === 0 ? (
-                        <p>No categories found.</p>
+                        <p>No items found.</p>
                     ) : (
                         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
                             {ItemsPagination.data.map((item) => (

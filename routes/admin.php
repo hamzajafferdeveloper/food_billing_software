@@ -20,7 +20,6 @@ Route::prefix('admin/')->middleware(['auth', 'verified', 'isAdmin'])->name('admi
     // Food Item Routes
     Route::prefix('food-item/')->name('food.item.')->group(function () {
         Route::get('all', [FoodItemController::class, 'index'])->name('index');
-        Route::get('{id}', [FoodItemController::class, 'show'])->name('single');
         Route::post('store', [FoodItemController::class, 'store'])->name('store');
         Route::put('update/{id}', [FoodItemController::class, 'update'])->name('update');
         Route::delete('delete/{id}', [FoodItemController::class, 'destroy'])->name('destroy');

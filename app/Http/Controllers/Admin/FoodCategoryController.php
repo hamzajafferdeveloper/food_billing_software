@@ -29,7 +29,6 @@ class FoodCategoryController extends Controller
         ]);
     }
 
-
     /**
      * Store a newly created resource in storage.
      */
@@ -57,15 +56,6 @@ class FoodCategoryController extends Controller
 
         return redirect()->route('admin.food.category.index')
             ->with('success', 'Food Category created successfully.');
-    }
-
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
     }
 
     /**

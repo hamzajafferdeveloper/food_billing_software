@@ -6,7 +6,9 @@ import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
 import item from '@/routes/admin/food/item';
+import { foodItemSchema } from '@/schema/food-item-schema';
 import { FoodCategory, FoodItem } from '@/types/data';
+import { FoodItemValidationErrors } from '@/types/validation';
 import { router } from '@inertiajs/react';
 import { Check, ChevronsUpDown } from 'lucide-react';
 import { useState } from 'react';
@@ -25,6 +27,7 @@ const EditItemModal = ({ onOpen, onOpenChange, categories, data }: Props) => {
     const [openCategory, setOpenCategory] = useState(false);
     const [image, setImage] = useState<File | null>(null);
     const [previewImage, setPreviewImage] = useState<string | null>('/storage/' + data.image);
+    const [errors, setErrors] = useState<FoodItemValidationErrors>({});
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0] || null;
@@ -39,6 +42,22 @@ const EditItemModal = ({ onOpen, onOpenChange, categories, data }: Props) => {
 
     const handleFormSubmit = (e: React.FormEvent) => {
         e.preventDefault();
+
+        const result = foodItemSchema.safeParse({ name, image: image || undefined });
+
+        if (!result.success) {
+            // map Zod errors
+            const fieldErrors: { name?: string; image?: string } = {};
+            result.error.issues.forEach((err) => {
+                const field = err.path[0] as 'name' | 'image';
+                fieldErrors[field] = err.message;
+            });
+            setErrors(fieldErrors);
+            return;
+        }
+
+        // clear errors if validation passes
+        setErrors({});
 
         const formData = new FormData();
         formData.append('name', name);
@@ -85,6 +104,7 @@ const EditItemModal = ({ onOpen, onOpenChange, categories, data }: Props) => {
                                 onChange={(e) => setName(e.target.value)}
                                 required
                             />
+                            {errors.name && <p className="text-sm text-red-500">{errors.name}</p>}
                         </div>
 
                         <div className="grid gap-3">
@@ -99,6 +119,7 @@ const EditItemModal = ({ onOpen, onOpenChange, categories, data }: Props) => {
                                 onChange={(e) => setPrice(e.target.value)}
                                 required
                             />
+                            {errors.price && <p className="text-sm text-red-500">{errors.price}</p>}
                         </div>
 
                         <div className="grid gap-3">
@@ -138,12 +159,14 @@ const EditItemModal = ({ onOpen, onOpenChange, categories, data }: Props) => {
                                     </Command>
                                 </PopoverContent>
                             </Popover>
+                            {errors.category_id && <p className="text-sm text-red-500">{errors.category_id}</p>}
                         </div>
 
                         <div className="grid gap-3">
                             <Label htmlFor="image">Image (Optional)</Label>
                             {previewImage && <img src={previewImage} alt="Preview" className="h-20 w-20 rounded-md object-cover" />}
                             <Input type="file" id="image" name="image" accept="image/*" onChange={handleFileChange} />
+                            {errors.image && <p className="text-sm text-red-500">{errors.image}</p>}
                         </div>
                     </div>
 
