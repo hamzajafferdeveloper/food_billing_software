@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\FoodCategoryController;
 use App\Http\Controllers\Admin\FoodItemController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\TableController;
 
 Route::prefix('admin/')->middleware(['auth', 'verified', 'isAdmin'])->name('admin.')->group(function() {
     Route::get('dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
@@ -32,5 +33,14 @@ Route::prefix('admin/')->middleware(['auth', 'verified', 'isAdmin'])->name('admi
         Route::post('store', [UserController::class, 'store'])->name('store');
         Route::put('update/{id}', [UserController::class, 'update'])->name('update');
         Route::delete('delete/{id}', [UserController::class, 'destroy'])->name('destroy');
+    });
+
+    // Tables Routes
+    Route::prefix('tables/')->name('table.')->group(function () {
+        Route::get('all', [TableController::class, 'index'])->name('index');
+        Route::get('{id}', [TableController::class, 'show'])->name('single');
+        Route::post('store', [TableController::class, 'store'])->name('store');
+        Route::put('update/{id}', [TableController::class, 'update'])->name('update');
+        Route::delete('delete/{id}', [TableController::class, 'destroy'])->name('destroy');
     });
 });

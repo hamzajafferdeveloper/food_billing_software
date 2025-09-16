@@ -2,9 +2,11 @@
 
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 Route::get('/', function () {
-    return Inertia::render('welcome');
+    $qrCode = QrCode::size(300)->generate('Hello, Laravel 11!');
+    return $qrCode;
 })->name('home');
 
 require __DIR__.'/settings.php';
