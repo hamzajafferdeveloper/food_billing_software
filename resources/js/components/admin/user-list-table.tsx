@@ -21,13 +21,11 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { User } from '@/types';
 import { ExistingEmail, Roles } from '@/types/data';
 import { UserPagination } from '@/types/pagination';
-import { router } from '@inertiajs/react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import EditUserModal from './modal/edit-user-modal';
 import user from '@/routes/admin/user';
 import PaginationLink from '../pagination-link';
@@ -47,7 +45,6 @@ export function UserListTable({ usersPagination, roles, existingEmail }: Props) 
     const [rowSelection, setRowSelection] = useState({});
     const [selectedUser, setSelectedUser] = useState<User | null>(null);
     const [editModalOpen, setEditModalOpen] = useState<boolean>(false);
-    const [searchValue, setSearchValue] = useState<string>('');
 
     const handleEditClick = (user: User) => {
         setSelectedUser(user);
@@ -143,36 +140,8 @@ export function UserListTable({ usersPagination, roles, existingEmail }: Props) 
         },
     });
 
-    const handleNextPageClick = () => {
-        if (usersPagination.next_page_url) {
-            router.get(usersPagination.next_page_url, {}, { preserveState: true });
-        }
-    };
-
-    const handlePreviousPageClick = () => {
-        if (usersPagination.prev_page_url) {
-            router.get(usersPagination.prev_page_url, {}, { preserveState: true });
-        }
-    };
-
-    useEffect(() => {
-        if(searchValue) {
-            router.get(user.index().url, { search: searchValue }, { preserveState: true, replace: true });
-        } else {
-            router.get(user.index().url, {}, { preserveState: true, replace: true });
-        }
-    }, [searchValue]);
-
     return (
         <div className="w-full">
-            <div className="flex items-center py-4">
-                <Input
-                    placeholder="Filter emails..."
-                    value={searchValue}
-                    onChange={(e) => setSearchValue(e.target.value)}
-                    className="max-w-sm"
-                />
-            </div>
             <div className="overflow-hidden rounded-md border">
                 <Table>
                     <TableHeader>

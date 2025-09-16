@@ -17,14 +17,20 @@ class FoodCategoryController extends Controller
     public function index(Request $request)
     {
         // Get per_page from query, default to 10
-        $perPage = $request->input('per_page', 10);
+        $perPage = $request->input('per_page', 2);
+        $search_query = $request->input('search', '');
 
         $food_categories = FoodCategory::orderBy('id', 'desc')
+            ->when($search_query, function ($query, $search_query) {
+                $query->where(function ($q) use ($search_query) {
+                    $q->where('name', 'like', "%{$search_query}%");
+                });
+            })
             ->paginate($perPage)
             ->appends(['per_page' => $perPage]);
 
         return Inertia::render('admin/food-category/index', [
-            'CategoriesPagination' => $food_categories,
+            'categoriesPagination' => $food_categories,
             'per_page'        => $perPage,
         ]);
     }

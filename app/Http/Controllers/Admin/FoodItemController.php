@@ -19,15 +19,21 @@ class FoodItemController extends Controller
     {
         // Get per_page from query, default to 10
         $perPage = $request->input('per_page', 10);
+        $search_query = $request->input('search', '');
 
         $categories = FoodCategory::select('id', 'name')->get();
 
         $food_items = FoodItem::orderBy('id', 'desc')
+            ->when($search_query, function ($query, $search_query) {
+                $query->where(function ($q) use ($search_query) {
+                    $q->where('name', 'like', "%{$search_query}%");
+                });
+            })
             ->paginate($perPage)
             ->appends(['per_page' => $perPage]);
 
         return Inertia::render('admin/food-item/index', [
-            'ItemsPagination' => $food_items,
+            'itemsPagination' => $food_items,
             'per_page'        => $perPage,
             'categories' => $categories
         ]);

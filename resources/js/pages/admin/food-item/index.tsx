@@ -18,12 +18,13 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 type Props = {
-    ItemsPagination: FoodItemPagination;
+    itemsPagination: FoodItemPagination;
     categories: FoodCategory[];
 };
 
-export default function AllFoodItems({ ItemsPagination, categories }: Props) {
+export default function AllFoodItems({ itemsPagination, categories }: Props) {
     const [onCreateModalOpen, setOnCreateModalOpen] = useState<boolean>(false);
+
     return (
         <AdminSidebarLayout breadcrumbs={breadcrumbs}>
             <Head title="All Items" />
@@ -34,20 +35,22 @@ export default function AllFoodItems({ ItemsPagination, categories }: Props) {
                     onClick={() => {
                         setOnCreateModalOpen(true);
                     }}
+                    baseUrl={item.index().url}
+                    searchPlaceHolder="Filter items..."
                 />
 
                 {/* List all Category */}
                 <section>
-                    {ItemsPagination.data.length === 0 ? (
-                        <p>No items found.</p>
+                    {itemsPagination.data.length === 0 ? (
+                        <p className='w-full text-center'>No items found.</p>
                     ) : (
                         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-                            {ItemsPagination.data.map((item) => (
+                            {itemsPagination.data.map((item) => (
                                 <ItemCard key={item.id} data={item} categories={categories} />
                             ))}
                         </div>
                     )}
-                    <PaginationLink pagination={ItemsPagination} currentPageLink={item.index().url} />
+                    <PaginationLink pagination={itemsPagination} currentPageLink={item.index().url} />
                 </section>
             </div>
             <CreateItemModal onOpen={onCreateModalOpen} onOpenChange={setOnCreateModalOpen} categories={categories} />
