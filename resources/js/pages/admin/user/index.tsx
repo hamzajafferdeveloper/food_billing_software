@@ -6,8 +6,8 @@ import user from '@/routes/admin/user';
 import { type BreadcrumbItem } from '@/types';
 import { ExistingEmail, Roles } from '@/types/data';
 import { UserPagination } from '@/types/pagination';
-import { Head, router } from '@inertiajs/react';
-import { useEffect, useState } from 'react';
+import { Head } from '@inertiajs/react';
+import { useState } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -26,13 +26,6 @@ export default function AllUsers({ usersPagination, roles, existingEmails }: Pro
     const [onCreateModalOpen, setOnCreateModalOpen] = useState<boolean>(false);
     const [searchValue, setSearchValue] = useState<string>('');
 
-    useEffect(() => {
-        if (searchValue) {
-            router.get(user.index().url, { search: searchValue }, { preserveState: true, replace: true });
-        } else {
-            router.get(user.index().url, {}, { preserveState: true, replace: true });
-        }
-    }, [searchValue]);
     return (
         <AdminSidebarLayout breadcrumbs={breadcrumbs}>
             <Head title="All Users" />
@@ -45,6 +38,8 @@ export default function AllUsers({ usersPagination, roles, existingEmails }: Pro
                     }}
                     baseUrl={user.index().url}
                     searchPlaceHolder="Filter users..."
+                    searchValue={searchValue}
+                    setSearchValue={setSearchValue}
                 />
                 <UserListTable usersPagination={usersPagination} roles={roles} existingEmail={existingEmails} />
             </div>

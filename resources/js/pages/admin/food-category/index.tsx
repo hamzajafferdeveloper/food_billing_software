@@ -6,8 +6,9 @@ import PaginationLink from '@/components/pagination-link';
 import AdminSidebarLayout from '@/layouts/admin/admin-layout';
 import category from '@/routes/admin/food/category';
 import { type BreadcrumbItem } from '@/types';
+import { FoodCategory } from '@/types/data';
 import { FoodCategoryPagination } from '@/types/pagination';
-import { Head, router } from '@inertiajs/react';
+import { Head } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -20,14 +21,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 export default function AllFoodCategories({ categoriesPagination }: { categoriesPagination: FoodCategoryPagination }) {
     const [onCreateModalOpen, setOnCreateModalOpen] = useState<boolean>(false);
     const [searchValue, setSearchValue] = useState<string>('');
-
-    useEffect(() => {
-        if (searchValue) {
-            router.get(category.index().url, { search: searchValue }, { preserveState: true, replace: true });
-        } else {
-            router.get(category.index().url, {}, { preserveState: true, replace: true });
-        }
-    }, [searchValue]);
+    const [allCategories, setAllCategories] = useState<FoodCategory[]>(categoriesPagination.data);
 
     return (
         <AdminSidebarLayout breadcrumbs={breadcrumbs}>
@@ -41,12 +35,14 @@ export default function AllFoodCategories({ categoriesPagination }: { categories
                     }}
                     baseUrl={category.index().url}
                     searchPlaceHolder="Filter categories..."
+                    searchValue={searchValue}
+                    setSearchValue={setSearchValue}
                 />
 
                 {/* List all Category */}
                 <section>
                     {categoriesPagination.data.length === 0 ? (
-                        <p className='w-full text-center'>No categories found.</p>
+                        <p className="w-full text-center">No categories found.</p>
                     ) : (
                         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
                             {categoriesPagination.data.map((category) => (
@@ -55,7 +51,7 @@ export default function AllFoodCategories({ categoriesPagination }: { categories
                         </div>
                     )}
                     <PaginationLink pagination={categoriesPagination} currentPageLink={category.index().url} />
-                    <LoadMoreBtn />
+                    {/* <LoadMoreBtn /> */}
                 </section>
             </div>
 

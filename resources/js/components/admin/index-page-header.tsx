@@ -9,10 +9,11 @@ interface Props {
     onClick: () => void;
     baseUrl: string;
     searchPlaceHolder: string;
+    searchValue: string;
+    setSearchValue: (value: string) => void;
 }
 
-const IndexPageHeader = ({ title, btnText, onClick, baseUrl, searchPlaceHolder }: Props) => {
-    const [searchValue, setSearchValue] = useState<string>('');
+const IndexPageHeader = ({ title, btnText, onClick, baseUrl, searchPlaceHolder, searchValue, setSearchValue }: Props) => {
 
     useEffect(() => {
         if (searchValue) {
@@ -22,8 +23,8 @@ const IndexPageHeader = ({ title, btnText, onClick, baseUrl, searchPlaceHolder }
         }
     }, [searchValue]);
     return (
-        <header className="mb-4 flex items-center w-full justify-between">
-            <div className="flex items-center gap-4 w-1/2">
+        <header className="mb-4 md:flex items-center w-full justify-between">
+            <div className="flex items-center gap-4 w-full">
                 <h1 className="text-xl font-medium">{title}</h1>
                 <Input placeholder={searchPlaceHolder} value={searchValue} onChange={(e) => setSearchValue(e.target.value)} className="max-w-sm" />
             </div>
