@@ -6,7 +6,8 @@ import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
 import user from '@/routes/admin/user';
-import { UserSchema } from '@/schema/user-schema';
+import { EditUserSchema } from '@/schema/user-schema';
+import { User } from '@/types';
 import { ExistingEmail, Roles } from '@/types/data';
 import { UserValidationErrors } from '@/types/validation';
 import { router } from '@inertiajs/react';
@@ -18,14 +19,15 @@ interface Props {
     onOpenChange: (open: boolean) => void;
     roles: Roles[];
     existingEmail: ExistingEmail[];
+    prevData: User;
 }
 
-const CreateUserModal = ({ onOpen, onOpenChange, roles, existingEmail }: Props) => {
+const EditUserModal = ({ onOpen, onOpenChange, roles, existingEmail, prevData }: Props) => {
     const [data, setData] = useState({
-        name: '',
-        email: '',
-        number: '',
-        role_id: '',
+        name: prevData?.name || '',
+        email: prevData?.email || '',
+        number: prevData?.phone_number || '',
+        role_id: prevData?.roles[0]?.id ? String(prevData.roles[0].id) : '',
         password: '',
         password_confirmation: '',
     });
@@ -57,11 +59,12 @@ const CreateUserModal = ({ onOpen, onOpenChange, roles, existingEmail }: Props) 
 
     const handleOpenChange = (open: boolean) => {
         if (!open) {
+            // Reset back to original prevData
             setData({
-                name: '',
-                email: '',
-                number: '',
-                role_id: '',
+                name: prevData?.name || '',
+                email: prevData?.email || '',
+                number: prevData?.phone_number || '',
+                role_id: prevData?.roles[0]?.id ? String(prevData.roles[0].id) : '',
                 password: '',
                 password_confirmation: '',
             });
@@ -74,7 +77,7 @@ const CreateUserModal = ({ onOpen, onOpenChange, roles, existingEmail }: Props) 
     const handleFormSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
-        const result = UserSchema.safeParse(data);
+        const result = EditUserSchema.safeParse(data);
 
         if (!result.success) {
             // map Zod errors
@@ -90,7 +93,7 @@ const CreateUserModal = ({ onOpen, onOpenChange, roles, existingEmail }: Props) 
         // clear errors if validation passes
         setErrors({});
 
-        router.post(user.store.url(), data);
+        router.put(user.update.url(prevData?.id), data);
 
         // reset
         setData({
@@ -109,9 +112,9 @@ const CreateUserModal = ({ onOpen, onOpenChange, roles, existingEmail }: Props) 
             <DialogContent>
                 <form onSubmit={handleFormSubmit} className="space-y-6">
                     <DialogHeader>
-                        <DialogTitle>Add New User</DialogTitle>
+                        <DialogTitle>Edit User</DialogTitle>
                         <DialogDescription>
-                            Fill the form and click <b>‘Save changes’</b> to create a new user.
+                            Fill the form and click <b>‘Save changes’</b> to edit user.
                         </DialogDescription>
                     </DialogHeader>
                     <div className="grid gap-4">
@@ -182,7 +185,7 @@ const CreateUserModal = ({ onOpen, onOpenChange, roles, existingEmail }: Props) 
                             {errors.role && <p className="text-sm text-red-500">{errors.role}</p>}
                         </div>
                         <div className="grid gap-3">
-                            <Label htmlFor="password">User Password</Label>
+                            <Label htmlFor="password">New Password</Label>
                             <div className="relative">
                                 <Input
                                     id="password"
@@ -203,7 +206,7 @@ const CreateUserModal = ({ onOpen, onOpenChange, roles, existingEmail }: Props) 
                             {errors.password && <p className="text-sm text-red-500">{errors.password}</p>}
                         </div>
                         <div className="grid gap-3">
-                            <Label htmlFor="password_confirmation">ReType Password</Label>
+                            <Label htmlFor="password_confirmation">ReType New Password</Label>
                             <div className="relative">
                                 <Input
                                     id="password_confirmation"
@@ -240,4 +243,4 @@ const CreateUserModal = ({ onOpen, onOpenChange, roles, existingEmail }: Props) 
     );
 };
 
-export default CreateUserModal;
+export default EditUserModal;

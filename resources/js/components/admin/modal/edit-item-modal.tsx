@@ -87,9 +87,9 @@ const EditItemModal = ({ onOpen, onOpenChange, categories, data }: Props) => {
             <DialogContent>
                 <form onSubmit={handleFormSubmit} className="space-y-6">
                     <DialogHeader>
-                        <DialogTitle>Add New Item</DialogTitle>
+                        <DialogTitle>Edit Item</DialogTitle>
                         <DialogDescription>
-                            Fill the form and click <b>‘Save changes’</b> to create a new item.
+                            Fill the form and click <b>‘Save changes’</b> to edit item.
                         </DialogDescription>
                     </DialogHeader>
 

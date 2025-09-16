@@ -1,5 +1,6 @@
 import { InertiaLinkProps } from '@inertiajs/react';
 import { LucideIcon } from 'lucide-react';
+import { Roles } from './data';
 
 export interface Auth {
     user: User;
@@ -34,10 +35,12 @@ export interface User {
     id: number;
     name: string;
     email: string;
+    phone_number?: string
     avatar?: string;
     email_verified_at: string | null;
     created_at: string;
     updated_at: string;
+    roles: Roles[];
 
     [key: string]: unknown; // This allows for additional properties...
 }

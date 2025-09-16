@@ -66,7 +66,7 @@ const CreateCategoryModal = ({ onOpen, onOpenChange }: Props) => {
                     <div className="grid gap-4">
                         <div className="grid gap-3">
                             <Label htmlFor="name">Name</Label>
-                            <Input id="name" name="name" placeholder="e.g. Burgers" value={name} onChange={(e) => setName(e.target.value)} required/>
+                            <Input id="name" name="name" placeholder="e.g. Burgers" value={name} onChange={(e) => setName(e.target.value)} required />
                             {errors.name && <p className="text-sm text-red-500">{errors.name}</p>}
                         </div>
 

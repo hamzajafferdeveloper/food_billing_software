@@ -74,9 +74,9 @@ const EditCategoryModal = ({ onOpen, onOpenChange, data }: Props) => {
             <DialogContent>
                 <form onSubmit={handleFormSubmit} className="space-y-6">
                     <DialogHeader>
-                        <DialogTitle>Add New Category</DialogTitle>
+                        <DialogTitle>Edit Category</DialogTitle>
                         <DialogDescription>
-                            Fill the form and click <b>‘Save changes’</b> to create a new category.
+                            Fill the form and click <b>‘Save changes’</b> to edit category.
                         </DialogDescription>
                     </DialogHeader>
 

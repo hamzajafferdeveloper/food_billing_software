@@ -1,3 +1,4 @@
+import { User } from '.';
 import { FoodItem } from './data';
 
 export interface Pagination {
@@ -21,6 +22,10 @@ export interface FoodCategoryPagination extends Pagination {
 
 export interface FoodItemPagination extends Pagination {
     data: FoodItem[];
+}
+
+export interface UserPagination extends Pagination {
+    data: User[];
 }
 
 export interface Link {

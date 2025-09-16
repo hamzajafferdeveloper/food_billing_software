@@ -9,3 +9,12 @@ export interface FoodCategoryValidationErrors {
     name?: string;
     image?: string;
 }
+
+export interface UserValidationErrors {
+    name?: string;
+    email?: string;
+    number?: string;
+    password?: string;
+    password_confirmation?: string;
+    role?: string;
+}
