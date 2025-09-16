@@ -30,6 +30,7 @@ import { router } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
 import EditUserModal from './modal/edit-user-modal';
 import user from '@/routes/admin/user';
+import PaginationLink from '../pagination-link';
 
 type Props = {
     usersPagination: UserPagination;
@@ -204,19 +205,7 @@ export function UserListTable({ usersPagination, roles, existingEmail }: Props) 
                     </TableBody>
                 </Table>
             </div>
-            <div className="flex items-center justify-end space-x-2 py-4">
-                <div className="flex-1 text-sm text-muted-foreground">
-                    {usersPagination.data.length} of {usersPagination.total} row(s) selected.
-                </div>
-                <div className="space-x-2">
-                    <Button variant="outline" size="sm" onClick={() => handlePreviousPageClick()} disabled={!usersPagination.prev_page_url}>
-                        Previous
-                    </Button>
-                    <Button variant="outline" size="sm" onClick={() => handleNextPageClick()} disabled={!usersPagination.next_page_url}>
-                        Next
-                    </Button>
-                </div>
-            </div>
+            <PaginationLink pagination={usersPagination} currentPageLink={user.index().url} />
 
             {selectedUser && (
                 <EditUserModal

@@ -1,6 +1,7 @@
 import CategoryCard from '@/components/admin/card/category-card';
 import IndexPageHeader from '@/components/admin/index-page-header';
 import CreateCategoryModal from '@/components/admin/modal/create-category-modal';
+import PaginationLink from '@/components/pagination-link';
 import AdminSidebarLayout from '@/layouts/admin/admin-layout';
 import category from '@/routes/admin/food/category';
 import { type BreadcrumbItem } from '@/types';
@@ -40,6 +41,7 @@ export default function AllFoodCategories({ CategoriesPagination }: { Categories
                             ))}
                         </div>
                     )}
+                    <PaginationLink pagination={CategoriesPagination} currentPageLink={category.index().url} />
                 </section>
             </div>
 

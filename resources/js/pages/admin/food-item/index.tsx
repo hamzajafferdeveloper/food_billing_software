@@ -1,6 +1,7 @@
 import ItemCard from '@/components/admin/card/item-card';
 import IndexPageHeader from '@/components/admin/index-page-header';
 import CreateItemModal from '@/components/admin/modal/create-item-modal';
+import PaginationLink from '@/components/pagination-link';
 import AdminSidebarLayout from '@/layouts/admin/admin-layout';
 import item from '@/routes/admin/food/item';
 import { type BreadcrumbItem } from '@/types';
@@ -46,6 +47,7 @@ export default function AllFoodItems({ ItemsPagination, categories }: Props) {
                             ))}
                         </div>
                     )}
+                    <PaginationLink pagination={ItemsPagination} currentPageLink={item.index().url} />
                 </section>
             </div>
             <CreateItemModal onOpen={onCreateModalOpen} onOpenChange={setOnCreateModalOpen} categories={categories} />

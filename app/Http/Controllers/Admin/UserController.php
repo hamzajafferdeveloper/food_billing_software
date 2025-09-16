@@ -17,7 +17,7 @@ class UserController extends Controller
      */
     public function index(Request $request)
     {
-        $per_page = $request->input('per_page', 10);
+        $per_page = $request->input('per_page', 2);
         $search_query = $request->input('search', '');
         $authenticated_user = Auth::user();
         $existing_emails = User::select('email')->get();
