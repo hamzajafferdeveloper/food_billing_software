@@ -13,18 +13,40 @@ export function cn(...inputs: ClassValue[]) {
  * @returns Updated SVG string
  */
 export function resizeSvg(svgString: string, width: number, height: number): string {
-  // Use regex to replace or insert width/height
-  let updated = svgString
-    .replace(/width="[^"]*"/, `width="${width}"`)
-    .replace(/height="[^"]*"/, `height="${height}"`);
+    // Use regex to replace or insert width/height
+    let updated = svgString.replace(/width="[^"]*"/, `width="${width}"`).replace(/height="[^"]*"/, `height="${height}"`);
 
-  // If width/height are missing, inject them into the <svg ...> tag
-  if (!/width="/.test(updated)) {
-    updated = updated.replace(/<svg/, `<svg width="${width}"`);
-  }
-  if (!/height="/.test(updated)) {
-    updated = updated.replace(/<svg/, `<svg height="${height}"`);
-  }
+    // If width/height are missing, inject them into the <svg ...> tag
+    if (!/width="/.test(updated)) {
+        updated = updated.replace(/<svg/, `<svg width="${width}"`);
+    }
+    if (!/height="/.test(updated)) {
+        updated = updated.replace(/<svg/, `<svg height="${height}"`);
+    }
 
-  return updated;
+    return updated;
+}
+
+export function storeUniqueId(uniqueId: string) {
+    const storageKey = 'uniqueId';
+    localStorage.removeItem(storageKey);
+    const expiryTime = Date.now() + 60 * 60 * 1000;
+    localStorage.setItem(storageKey, JSON.stringify({ value: uniqueId, expiresAt: expiryTime }));
+}
+
+export function getStoredUniqueId(): string | null {
+    const raw = localStorage.getItem('uniqueId');
+    if (!raw) return null;
+
+    try {
+        const { value, expiresAt } = JSON.parse(raw);
+        if (Date.now() > expiresAt) {
+            localStorage.removeItem('uniqueId');
+            return null;
+        }
+        return value;
+    } catch {
+        localStorage.removeItem('uniqueId');
+        return null;
+    }
 }

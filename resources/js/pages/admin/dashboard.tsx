@@ -1,5 +1,4 @@
 import DashboardItemCard from '@/components/admin/card/dashboard-item-card';
-import { PlaceholderPattern } from '@/components/ui/placeholder-pattern';
 import AdminSidebarLayout from '@/layouts/admin/admin-layout';
 import { dashboard } from '@/routes/admin';
 import { type BreadcrumbItem } from '@/types';
@@ -21,7 +20,7 @@ export default function Dashboard({ ItemsPagination }: { ItemsPagination: FoodIt
                 {/* List all Category */}
                 <section>
                     {ItemsPagination.data.length === 0 ? (
-                        <p>No items found.</p>
+                        <p className="w-full text-center">No table found.</p>
                     ) : (
                         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
                             {ItemsPagination.data.map((item) => (

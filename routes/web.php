@@ -5,8 +5,20 @@ use Inertia\Inertia;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 Route::get('/', function () {
-    $qrCode = QrCode::size(300)->generate('Hello, Laravel 11!');
-    return $qrCode;
+    $tables = \App\Models\Table::all();
+
+    $app_url = env('APP_URL', 'localhost:0000');;
+
+
+    foreach ($tables as $table)
+    {
+        $table->qr_code = (string) QrCode::size(300)->generate( $app_url . '/table-number=' . $table->table_number);
+    }
+
+    return Inertia::render('welcome', [
+        'tables' => $tables
+    ]);
+
 })->name('home');
 
 require __DIR__.'/settings.php';

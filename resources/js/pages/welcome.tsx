@@ -1,18 +1,28 @@
-import { login } from '@/routes';
-import { type SharedData } from '@/types';
-import { Head, Link, usePage } from '@inertiajs/react';
+import { resizeSvg } from '@/lib/utils';
+import { TableWithQrCode } from '@/types/data';
+import { Head } from '@inertiajs/react';
 
-export default function Welcome() {
-    const { auth } = usePage<SharedData>().props;
-
+export default function Welcome({ tables }: { tables: TableWithQrCode[] }) {
+    console.log(tables);
     return (
         <>
             <Head title="Welcome">
                 <link rel="preconnect" href="https://fonts.bunny.net" />
                 <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600" rel="stylesheet" />
             </Head>
-            <div className='flex min-h-screen flex-col items-center justify-center bg-gray-100 dark:bg-gray-900'>
-                <Link href={login()} className="text-sm text-gray-700 underline dark:text-gray-500">Login</Link>
+            <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
+                {tables.length === 0 ? (
+                    <p>No Table Found</p>
+                ) : (
+                    <div className="w-full h-full grid grid-cols-1 gap-10 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
+                        {tables.map((table) => (
+                            <div className='p-2 border gap-4 rounded-md shadow-xl items-center flex flex-col'>
+                                <div dangerouslySetInnerHTML={{ __html: resizeSvg(table.qr_code, 200, 200) }} />
+                                <p>Table: { table.table_number }</p>
+                            </div>
+                        ))}
+                    </div>
+                )}
             </div>
         </>
     );
