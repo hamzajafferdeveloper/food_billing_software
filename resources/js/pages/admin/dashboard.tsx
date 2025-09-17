@@ -1,3 +1,4 @@
+import DashboardItemCard from '@/components/admin/card/dashboard-item-card';
 import { PlaceholderPattern } from '@/components/ui/placeholder-pattern';
 import AdminSidebarLayout from '@/layouts/admin/admin-layout';
 import { dashboard } from '@/routes/admin';
@@ -24,8 +25,7 @@ export default function Dashboard({ ItemsPagination }: { ItemsPagination: FoodIt
                     ) : (
                         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
                             {ItemsPagination.data.map((item) => (
-                                // <ItemCard key={item.id} data={item} categories={categories} />
-                                <PlaceholderPattern key={item.id} className="h-48 w-full rounded-lg" />
+                                <DashboardItemCard key={item.id} data={item} />
                             ))}
                         </div>
                     )}
