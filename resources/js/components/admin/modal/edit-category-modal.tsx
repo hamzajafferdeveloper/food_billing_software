@@ -101,7 +101,7 @@ const EditCategoryModal = ({ onOpen, onOpenChange, data }: Props) => {
                                 Cancel
                             </Button>
                         </DialogClose>
-                        <Button type="submit">Save changes</Button>
+                        <Button className='cursor-pointer' type="submit">Save changes</Button>
                     </DialogFooter>
                 </form>
             </DialogContent>

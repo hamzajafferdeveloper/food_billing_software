@@ -20,10 +20,10 @@ interface Props {
 }
 
 const CreateItemModal = ({ onOpen, onOpenChange, categories }: Props) => {
-    const [name, setName] = useState('');
-    const [price, setPrice] = useState('');
+    const [name, setName] = useState<string>('');
+    const [price, setPrice] = useState<string>('');
     const [categoryId, setCategoryId] = useState<string>('');
-    const [openCategory, setOpenCategory] = useState(false);
+    const [openCategory, setOpenCategory] = useState<boolean>(false);
     const [image, setImage] = useState<File | null>(null);
     const [previewImage, setPreviewImage] = useState<string | null>(null);
     const [errors, setErrors] = useState<FoodItemValidationErrors>({});
@@ -42,7 +42,7 @@ const CreateItemModal = ({ onOpen, onOpenChange, categories }: Props) => {
     const handleFormSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
-        const result = foodItemSchema.safeParse({ name, image: image || undefined });
+        const result = foodItemSchema.safeParse({ name, price, category_id: categoryId, image: image || undefined });
 
         if (!result.success) {
             // map Zod errors
@@ -173,7 +173,7 @@ const CreateItemModal = ({ onOpen, onOpenChange, categories }: Props) => {
                                 Cancel
                             </Button>
                         </DialogClose>
-                        <Button type="submit">Save changes</Button>
+                        <Button className='cursor-pointer' type="submit">Save changes</Button>
                     </DialogFooter>
                 </form>
             </DialogContent>

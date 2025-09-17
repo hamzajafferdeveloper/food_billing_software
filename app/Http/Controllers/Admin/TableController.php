@@ -13,9 +13,16 @@ class TableController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $tables = Table::all();
+        $search_query = $request->input('search', '');
+        $tables = Table::orderBy('id', 'desc')
+            ->when($search_query, function ($query, $search_query) {
+                $query->where(function ($q) use ($search_query) {
+                    $q->where('table_number', 'like', "%{$search_query}%");
+                });
+            })->get();
+
 
         foreach ($tables as $table)
         {

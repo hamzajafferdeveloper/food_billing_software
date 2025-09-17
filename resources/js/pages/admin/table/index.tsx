@@ -17,6 +17,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 export default function Tables({ tables }: { tables: TableWithQrCode[] }) {
     const [onCreateModalOpen, setOnCreateModalOpen] = useState<boolean>(false);
+    const [searchValue, setSearchValue] = useState<string>('');
     return (
         <AdminSidebarLayout breadcrumbs={breadcrumbs}>
             <Head title="All Tables" />
@@ -28,13 +29,22 @@ export default function Tables({ tables }: { tables: TableWithQrCode[] }) {
                         setOnCreateModalOpen(true);
                     }}
                     baseUrl={table.index().url}
+                    searchPlaceHolder="Filter by there number..."
+                    searchValue={searchValue}
+                    setSearchValue={setSearchValue}
                 />
-                {/* List all Category */}
-                <div className="grid grid-cols-1 gap-4 space-y-8 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
-                    {tables.map((table) => (
-                        <TableWithQrCodeCard key={table.id} data={table} />
-                    ))}
-                </div>
+                {/* List all tables */}
+                <section>
+                    {tables.length === 0 ? (
+                        <p className="w-full text-center">No table found.</p>
+                    ) : (
+                        <div className="grid grid-cols-1 gap-4 space-y-8 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
+                            {tables.map((table) => (
+                                <TableWithQrCodeCard key={table.id} data={table} />
+                            ))}
+                        </div>
+                    )}
+                </section>
             </div>
             <CreateTableModal onOpen={onCreateModalOpen} onOpenChange={setOnCreateModalOpen} />
         </AdminSidebarLayout>

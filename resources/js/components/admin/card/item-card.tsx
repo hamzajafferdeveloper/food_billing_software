@@ -24,7 +24,7 @@ const ItemCard = ({ data, categories }: { data: FoodItem, categories: FoodCatego
             <Card className="group relative max-w-sm gap-0 overflow-hidden shadow-xl py-0">
                 <CardHeader className="relative p-0">
                     {/* Image */}
-                    <img src={`/storage/${data.image}`} alt={data.name} className="" />
+                    <img src={`/storage/${data.image}`} alt={data.name} className="h-64 w-full object-cover " />
 
                     {/* Hover Icons */}
                     <div className="absolute top-2 right-2 z-20 flex gap-2 opacity-0 transition-opacity duration-200 group-hover:opacity-100">

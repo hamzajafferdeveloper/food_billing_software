@@ -43,7 +43,7 @@ const EditItemModal = ({ onOpen, onOpenChange, categories, data }: Props) => {
     const handleFormSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
-        const result = foodItemSchema.safeParse({ name, image: image || undefined });
+        const result = foodItemSchema.safeParse({ name, price, category_id: categoryId, image: image || undefined });
 
         if (!result.success) {
             // map Zod errors
@@ -176,7 +176,7 @@ const EditItemModal = ({ onOpen, onOpenChange, categories, data }: Props) => {
                                 Cancel
                             </Button>
                         </DialogClose>
-                        <Button type="submit">Save changes</Button>
+                        <Button className='cursor-pointer' type="submit">Save changes</Button>
                     </DialogFooter>
                 </form>
             </DialogContent>
