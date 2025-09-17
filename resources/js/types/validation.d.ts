@@ -18,3 +18,7 @@ export interface UserValidationErrors {
     password_confirmation?: string;
     role?: string;
 }
+
+export interface TableValidationErrors {
+    table_number?: string;
+}

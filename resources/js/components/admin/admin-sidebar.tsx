@@ -9,6 +9,7 @@ import { dashboard } from '@/routes/admin';
 import category from '@/routes/admin/food/category';
 import item from '@/routes/admin/food/item';
 import user from '@/routes/admin/user';
+import table from '@/routes/admin/table';
 
 const mainNavItems: NavItem[] = [
     {
@@ -33,7 +34,7 @@ const mainNavItems: NavItem[] = [
     },
     {
         title: 'Tables',
-        href: '#',
+        href: table.index().url,
         icon: Sofa
     }
 ];

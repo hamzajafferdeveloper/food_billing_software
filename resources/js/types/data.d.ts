@@ -27,3 +27,14 @@ export interface Roles {
 export interface ExistingEmail {
     email: string;
 }
+
+export interface Table {
+    id: number;
+    table_number: number;
+    created_at?: string;
+    updated_at?: string;
+}
+
+export interface TableWithQrCode extends Table {
+    qr_code: string;
+}

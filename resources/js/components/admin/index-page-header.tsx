@@ -8,9 +8,9 @@ interface Props {
     btnText: string;
     onClick: () => void;
     baseUrl: string;
-    searchPlaceHolder: string;
-    searchValue: string;
-    setSearchValue: (value: string) => void;
+    searchPlaceHolder?: string;
+    searchValue?: string;
+    setSearchValue?: (value: string) => void;
 }
 
 const IndexPageHeader = ({ title, btnText, onClick, baseUrl, searchPlaceHolder, searchValue, setSearchValue }: Props) => {
@@ -26,7 +26,9 @@ const IndexPageHeader = ({ title, btnText, onClick, baseUrl, searchPlaceHolder, 
         <header className="mb-4 md:flex items-center w-full justify-between">
             <div className="flex items-center gap-4 w-full">
                 <h1 className="text-xl font-medium">{title}</h1>
-                <Input placeholder={searchPlaceHolder} value={searchValue} onChange={(e) => setSearchValue(e.target.value)} className="max-w-sm" />
+                {setSearchValue && (
+                    <Input placeholder={searchPlaceHolder} value={searchValue} onChange={(e) => setSearchValue(e.target.value)} className="max-w-sm" />
+                )}
             </div>
             <Button className="cursor-pointer" onClick={onClick}>
                 {btnText}

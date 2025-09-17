@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Table;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class TableController extends Controller
 {
@@ -13,7 +15,16 @@ class TableController extends Controller
      */
     public function index()
     {
-        //
+        $tables = Table::all();
+
+        foreach ($tables as $table)
+        {
+            $table->qr_code = (string) QrCode::size(300)->generate($table->table_number);
+        }
+
+        return Inertia::render('admin/table/index', [
+            'tables' => $tables
+        ]);
     }
 
     /**
