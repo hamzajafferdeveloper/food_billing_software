@@ -9,7 +9,7 @@ export default function AllFoodItems({ foodItems }: { foodItems: FoodItem[] }) {
         <CustomerSideBarLayout>
             <Head title="All Food Items" />
             <CustomerSidebarHeader />
-            <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+            <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-2 xl:grid-cols-3  2xl:grid-cols-4">
                 {foodItems.map((foodItem) => (
                     <FoodCard key={foodItem.id} image={foodItem.image} title={foodItem.name} price={foodItem.price} onAdd={() => {}} />
                 ))}
