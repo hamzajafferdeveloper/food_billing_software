@@ -3,11 +3,11 @@ import CustomerSideBarLayout from '@/layouts/customer/customer-layout';
 import { storeUniqueId } from '@/lib/utils';
 import { RootState } from '@/store';
 import { setCart } from '@/store/cartSlice'; // assuming you have this action
-import { Head, router } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
-export default function Home({ uniqueId }: { uniqueId: string }) {
+export default function Cart({ uniqueId }: { uniqueId: string }) {
     const reduxCartItems = useSelector((state: RootState) => state.cart.items);
     const dispatch = useDispatch();
 
@@ -81,7 +81,9 @@ export default function Home({ uniqueId }: { uniqueId: string }) {
                                 </div>
 
                                 {/* Subtotal */}
-                                <div className="col-span-2 text-right font-semibold text-gray-900">${item.subtotal ? item.subtotal.toFixed(2) : 0}</div>
+                                <div className="col-span-2 text-right font-semibold text-gray-900">
+                                    ${item.subtotal ? item.subtotal.toFixed(2) : 0}
+                                </div>
                             </div>
                         ))}
                     </div>
@@ -102,9 +104,12 @@ export default function Home({ uniqueId }: { uniqueId: string }) {
                         >
                             Back
                         </button>
-                        <button className="w-full max-w-xs cursor-pointer rounded-lg font-semibold shadow transition btn-primary">
+                        <Link
+                            href={`/${uniqueId}/checkout`}
+                            className="btn-primary flex w-full max-w-xs cursor-pointer justify-center rounded-lg font-semibold shadow transition"
+                        >
                             Proceed to Checkout
-                        </button>
+                        </Link>
                     </div>
                 </div>
             )}

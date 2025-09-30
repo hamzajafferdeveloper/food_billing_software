@@ -18,6 +18,9 @@ Route::prefix('/{unique_id}')->name('customer.')->middleware(['isCustomer'])->gr
     Route::get('/cart', function (String $unique_id) {
         return Inertia::render('customer/cart', ['uniqueId' => $unique_id]);
     })->name('cart');
+
+
+    Route::get('/checkout', [CardController::class, 'checkout'])->name('checkout');
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {
