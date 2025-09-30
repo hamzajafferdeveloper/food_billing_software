@@ -13,6 +13,11 @@ return new class extends Migration
     {
         Schema::create('carts', function (Blueprint $table) {
             $table->id();
+            $table->uuid('customer_id');
+            $table->foreign('customer_id')
+                ->references('unique_id')
+                ->on('customers')
+                ->cascadeOnDelete();
             $table->json('cart_items');
             $table->timestamps();
         });

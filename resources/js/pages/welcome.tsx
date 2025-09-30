@@ -3,7 +3,6 @@ import { TableWithQrCode } from '@/types/data';
 import { Head } from '@inertiajs/react';
 
 export default function Welcome({ tables }: { tables: TableWithQrCode[] }) {
-    console.log(tables);
     return (
         <>
             <Head title="Welcome">
@@ -16,7 +15,7 @@ export default function Welcome({ tables }: { tables: TableWithQrCode[] }) {
                 ) : (
                     <div className="w-full h-full grid grid-cols-1 gap-10 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
                         {tables.map((table) => (
-                            <div className='p-2 border gap-4 rounded-md shadow-xl items-center flex flex-col'>
+                            <div className='p-2 border gap-4 rounded-md shadow-xl items-center flex flex-col' key={table.id}>
                                 <div dangerouslySetInnerHTML={{ __html: resizeSvg(table.qr_code, 200, 200) }} />
                                 <p>Table: { table.table_number }</p>
                             </div>

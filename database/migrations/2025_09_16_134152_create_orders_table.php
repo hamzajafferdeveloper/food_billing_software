@@ -13,7 +13,14 @@ return new class extends Migration
     {
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('customer_id')->constrained('customers', 'unique_id')->cascadeOnDelete();
+            // orders migration
+            $table->uuid('customer_id');
+            $table->foreign('customer_id')
+                ->references('unique_id')
+                ->on('customers')
+                ->cascadeOnDelete();
+
+
             $table->foreignId('card_id')->constrained('carts')->cascadeOnDelete();
             $table->decimal('total_amount');
             $table->enum('payment_status', ['pending', 'completed', 'failed']);

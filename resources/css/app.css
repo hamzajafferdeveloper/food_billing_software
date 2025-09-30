@@ -139,3 +139,17 @@
         @apply bg-background text-foreground;
     }
 }
+
+
+.btn-primary{
+    background-color: #fce0a2 !important;
+    color: #171717 !important;
+    padding-inline: 1rem !important;
+    padding-block: 0.5rem !important;
+    font-weight: 500 !important;
+    border-radius: 0.5rem !important;
+}
+
+.btn-primary:hover{
+    background-color: #e2c68a !important;
+}

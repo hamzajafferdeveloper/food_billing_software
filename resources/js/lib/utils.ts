@@ -30,8 +30,7 @@ export function resizeSvg(svgString: string, width: number, height: number): str
 export function storeUniqueId(uniqueId: string) {
     const storageKey = 'uniqueId';
     localStorage.removeItem(storageKey);
-    const expiryTime = Date.now() + 60 * 60 * 1000;
-    localStorage.setItem(storageKey, JSON.stringify({ value: uniqueId, expiresAt: expiryTime }));
+    localStorage.setItem(storageKey, JSON.stringify({ value: uniqueId }));
 }
 
 export function getStoredUniqueId(): string | null {
@@ -39,8 +38,8 @@ export function getStoredUniqueId(): string | null {
     if (!raw) return null;
 
     try {
-        const { value, expiresAt } = JSON.parse(raw);
-        if (Date.now() > expiresAt) {
+        const { value } = JSON.parse(raw);
+        if (!value) {
             localStorage.removeItem('uniqueId');
             return null;
         }

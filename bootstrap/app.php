@@ -2,6 +2,7 @@
 
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
+use App\Http\Middleware\IsCustomerMiddleware;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -21,6 +22,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'isAdmin' => IsAdminMiddleware::class,
             'isChief' => IsChiefMiddleware::class,
+            'isCustomer' => IsCustomerMiddleware::class,
         ]);
 
         $middleware->web(append: [

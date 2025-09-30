@@ -12,7 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('customers', function (Blueprint $table) {
-            $table->string('unique_id')->primary();
+            $table->id(); // normal primary key
+            $table->uuid('unique_id')->unique(); // must be UNSIGNED + UNIQUE
             $table->foreignId('table_id')->constrained('tables')->cascadeOnDelete();
             $table->timestamps();
         });

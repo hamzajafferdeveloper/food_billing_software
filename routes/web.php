@@ -7,12 +7,12 @@ use SimpleSoftwareIO\QrCode\Facades\QrCode;
 Route::get('/', function () {
     $tables = \App\Models\Table::all();
 
-    $app_url = env('APP_URL', 'localhost:0000');;
+    $app_url = env('APP_URL', 'localhost:8000');;
 
 
     foreach ($tables as $table)
     {
-        $table->qr_code = (string) QrCode::size(300)->generate( $app_url . '/table-number=' . $table->table_number);
+        $table->qr_code = (string) QrCode::size(300)->generate( $app_url . 'table-number=' . $table->table_number);
     }
 
     return Inertia::render('welcome', [

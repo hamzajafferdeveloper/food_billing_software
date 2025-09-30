@@ -1,25 +1,29 @@
-import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader } from '@/components/ui/sidebar';
-import { cn, getStoredUniqueId } from '@/lib/utils';
+import { NavMain } from '@/components/nav-main';
+import { Sidebar, SidebarContent, SidebarHeader } from '@/components/ui/sidebar';
+import { getStoredUniqueId } from '@/lib/utils';
+import { home } from '@/routes/customer';
+import { categories, items } from '@/routes/customer/food';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
 import AppLogo from '../app-logo';
-import { categories, items } from '@/routes/customer/food';
-import { home } from '@/routes/customer';
-import { NavMain } from '@/components/nav-main';
+import { HomeIcon, PizzaIcon, Utensils } from 'lucide-react';
 
 const uniqueId = getStoredUniqueId();
 
 const mainNavItems: NavItem[] = [
     {
         title: 'Home',
+        icon: HomeIcon,
         href: home(uniqueId || '').url,
     },
-        {
+    {
         title: 'All Food Items',
+        icon: PizzaIcon,
         href: items(uniqueId || '').url,
     },
-        {
+    {
         title: 'Food Categories',
+        icon: Utensils,
         href: categories(uniqueId || '').url,
     },
 ];
@@ -27,8 +31,8 @@ const mainNavItems: NavItem[] = [
 export function CustomerSideBar() {
     return (
         <Sidebar collapsible="icon" variant="inset">
-            <SidebarHeader className='flex justify-between items-center mt-6'>
-                <Link href="#" className='flex items-center gap-2'>
+            <SidebarHeader>
+                <Link href="#" className="flex items-center gap-2">
                     <AppLogo />
                 </Link>
             </SidebarHeader>

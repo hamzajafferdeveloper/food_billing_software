@@ -21,7 +21,7 @@ class CustomerController extends Controller
             'table_id' => $table->id,
         ]);
 
-        return redirect()->route('customer.food.items', $unique_id);
+        return redirect()->route('customer.home', $unique_id);
 
     }
 }
