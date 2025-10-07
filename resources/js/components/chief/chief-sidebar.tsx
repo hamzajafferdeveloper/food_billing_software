@@ -3,15 +3,15 @@ import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
-import { LayoutGrid } from 'lucide-react';
+import { Package } from 'lucide-react';
 import AppLogo from '../app-logo';
-import { dashboard } from '@/routes/chief';
+import { newOrder } from '@/routes/chief';
 
 const mainNavItems: NavItem[] = [
     {
-        title: 'Dashboard',
-        href: dashboard().url,
-        icon: LayoutGrid,
+        title: 'New Order',
+        href: newOrder().url,
+        icon: Package,
     },
 ];
 
@@ -22,7 +22,7 @@ export function ChiefSidebar() {
                 <SidebarMenu>
                     <SidebarMenuItem>
                         <SidebarMenuButton size="lg" asChild>
-                            <Link href={dashboard()} prefetch>
+                            <Link href={newOrder()} prefetch>
                                 <AppLogo />
                             </Link>
                         </SidebarMenuButton>
@@ -31,7 +31,6 @@ export function ChiefSidebar() {
             </SidebarHeader>
             <SidebarContent>
                 <NavMain items={mainNavItems} />
-                <p>Chief SideBar</p>
             </SidebarContent>
 
             <SidebarFooter>

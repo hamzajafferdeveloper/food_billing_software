@@ -5,6 +5,15 @@ import laravel from 'laravel-vite-plugin';
 import { defineConfig } from 'vite';
 
 export default defineConfig({
+    server: {
+        host: 'resturant-billing-software',
+        port: 5173,
+        strictPort: true,
+        hmr: {
+            host: 'resturant-billing-software',
+        },
+        cors: true,
+    },
     plugins: [
         laravel({
             input: ['resources/css/app.css', 'resources/js/app.tsx'],
