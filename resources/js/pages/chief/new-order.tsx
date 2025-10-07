@@ -260,12 +260,12 @@ export default function NewOrder() {
                             >
                                 Decline
                             </button>
-                            <button
-                                onClick={() => confirmOrder(selectedOrder.id)}
-                                className="rounded-lg bg-green-500 px-4 py-2 font-semibold text-white transition hover:bg-green-600"
-                            >
-                                Confirm
-                            </button>
+                                <button
+                                    onClick={() => confirmOrder(selectedOrder.id)}
+                                    className={`rounded-lg bg-green-500 px-4 py-2 font-semibold cursor-pointer transition ${selectedOrder.payment_status === 'pending' ? 'hover:bg-green-600 text-red-800 opacity-50 pointer-events-none' : 'hover:bg-green-600  text-white'} `}
+                                >
+                                    {selectedOrder.payment_status === 'pending' ? 'Payment Pending' : 'Confirm'}
+                                </button>
                         </div>
                     </div>
                 </div>
