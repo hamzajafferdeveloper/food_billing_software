@@ -3,15 +3,26 @@ import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
-import { Package } from 'lucide-react';
+import { BadgeCheck, Package, PackageCheck } from 'lucide-react';
 import AppLogo from '../app-logo';
-import { newOrder } from '@/routes/chief';
+import { newOrder, confirmOrders, servedOrder } from '@/routes/chief';
+import confirm from '@/routes/password/confirm';
 
 const mainNavItems: NavItem[] = [
     {
         title: 'New Order',
         href: newOrder().url,
         icon: Package,
+    },
+    {
+        title: 'Confirm Order',
+        href: confirmOrders().url,
+        icon: PackageCheck,
+    },
+    {
+        title: 'Served Order',
+        href: servedOrder().url,
+        icon: BadgeCheck,
     },
 ];
 

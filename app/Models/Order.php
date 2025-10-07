@@ -11,6 +11,7 @@ class Order extends Model
         'card_id',
         'total_amount',
         'payment_status',
+        'status'
     ];
 
     public function cart(){
@@ -19,5 +20,9 @@ class Order extends Model
 
     public function customer(){
         return $this->belongsTo(Customer::class, 'customer_id', 'unique_id');
+    }
+
+    public function payment(){
+        return $this->hasOne(Payment::class,'order_id', 'id');
     }
 }
