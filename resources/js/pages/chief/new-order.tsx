@@ -94,10 +94,10 @@ export default function Dashboard() {
                         {orders.map((order) => (
                             <div
                                 key={order.id}
-                                className="rounded-xl bg-white p-6 shadow-lg transition duration-300 hover:shadow-2xl"
+                                className="rounded-xl bg-white dark:bg-gray-900 p-6 shadow-lg transition duration-300 hover:shadow-2xl"
                             >
                                 <div className="mb-3 flex items-center justify-between">
-                                    <h2 className="text-xl font-semibold text-gray-700">
+                                    <h2 className="text-xl font-semibold text-gray-700 dark:text-white">
                                         Table #{order.customer?.table_id ?? '—'}
                                     </h2>
                                     <span
@@ -108,22 +108,22 @@ export default function Dashboard() {
                                         {order.payment_status}
                                     </span>
                                 </div>
-                                <p className="mb-2 flex justify-between text-gray-500">
+                                <p className="mb-2 flex justify-between text-gray-500 dark:text-white">
                                     <span className="font-semibold">Order #:</span> {order.id}
                                 </p>
-                                <p className="mb-2 flex justify-between text-gray-500">
+                                <p className="mb-2 flex justify-between text-gray-500 dark:text-white">
                                     <span className="font-semibold">Date:</span> {order.created_at}
                                 </p>
-                                <p className="mb-2 flex justify-between text-gray-500">
+                                <p className="mb-2 flex justify-between text-gray-500 dark:text-white">
                                     <span className="font-semibold">Amount:</span> {order.total_amount}
                                 </p>
-                                <p className="mb-2 flex justify-between text-gray-500">
+                                <p className="mb-2 flex justify-between text-gray-500 dark:text-white">
                                     <span className="font-semibold">Sender:</span> {order.sender_number}
                                 </p>
-                                <p className="flex justify-between text-gray-500">
+                                <p className="flex justify-between text-gray-500 dark:text-white">
                                     <span className="font-semibold">Transaction ID:</span> {order.transaction_id}
                                 </p>
-                                <button className="mt-4 w-full rounded-lg bg-[#fce0a2] py-2 font-semibold text-[#171717] transition hover:bg-[#e4c37d]">
+                                <button className="mt-4 w-full cursor-pointer rounded-lg bg-[#fce0a2] py-2 font-semibold text-[#171717] transition hover:bg-[#e4c37d]">
                                     View Details
                                 </button>
                             </div>

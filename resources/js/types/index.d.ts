@@ -4,6 +4,7 @@ import { Roles } from './data';
 
 export interface Auth {
     user: User;
+    roles: string[];
 }
 
 export interface BreadcrumbItem {
