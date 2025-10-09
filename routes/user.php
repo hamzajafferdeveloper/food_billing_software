@@ -15,12 +15,17 @@ Route::prefix('/{unique_id}')->name('customer.')->middleware(['isCustomer'])->gr
     Route::get('/food-categories', [HomeController::class, 'foodCategories'])->name('food.categories');
     Route::post('/add-to-cart', [CardController::class, 'addToCart'])->name('add.to.cart');
     Route::get('/get-cart', [CardController::class, 'getCart'])->name('get.cart');
-    Route::get('/cart', function (String $unique_id) {
+    Route::get('/cart', function (string $unique_id) {
         return Inertia::render('customer/cart', ['uniqueId' => $unique_id]);
     })->name('cart');
-
-
+    
+    Route::post('/remove-from-cart', [CardController::class, 'removeFromCart'])->name('remove.from.cart');
+    Route::post('/update-cart-item-quantity', [CardController::class, 'updateCartQuantity'])->name('update.cart.quantity');
     Route::get('/checkout', [CardController::class, 'checkout'])->name('checkout');
+    Route::get('/order-status', [CardController::class, 'getOrderStatus']);
+    Route::get('/notification', function (string $unique_id) {
+        return Inertia::render('customer/notification', ['uniqueId' => $unique_id]);
+    });
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {

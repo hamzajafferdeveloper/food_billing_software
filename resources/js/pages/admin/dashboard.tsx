@@ -20,7 +20,7 @@ export default function Dashboard({ ItemsPagination }: { ItemsPagination: FoodIt
                 {/* List all Category */}
                 <section>
                     {ItemsPagination.data.length === 0 ? (
-                        <p className="w-full text-center">No table found.</p>
+                        <p className="w-full text-center">No Item found.</p>
                     ) : (
                         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
                             {ItemsPagination.data.map((item) => (

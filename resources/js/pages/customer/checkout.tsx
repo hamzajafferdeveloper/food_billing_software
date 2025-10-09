@@ -23,7 +23,7 @@ export default function CheckOut({ uniqueId, order }: { uniqueId: string; order:
                         </p>
                         <img className="h-auto w-64" src="/storage/images/payment_qr-code.png" />
                         <p className="text-center font-bold">
-                            ** After payment, submit the Transaction ID & Sender Number <Link className="text-blue-700">HERE</Link> **
+                            ** After payment, submit the Transaction ID & Sender Number <Link href={`/${uniqueId}/notification`} className="text-blue-700">HERE</Link> **
                         </p>
                     </div>
                 </div>

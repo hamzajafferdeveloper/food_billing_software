@@ -2,22 +2,21 @@ import { CustomerSidebarHeader } from '@/components/customer/customer-sidebar-he
 import CustomerSideBarLayout from '@/layouts/customer/customer-layout';
 import { storeUniqueId } from '@/lib/utils';
 import { RootState } from '@/store';
-import { setCart } from '@/store/cartSlice'; // assuming you have this action
-import { Head, Link, router } from '@inertiajs/react';
+import { clearCart, setCart } from '@/store/cartSlice';
+import { Head, router } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 export default function Cart({ uniqueId }: { uniqueId: string }) {
     const reduxCartItems = useSelector((state: RootState) => state.cart.items);
     const dispatch = useDispatch();
-
-    // start with Redux items, update later with fetched items
     const [cartItems, setCartItems] = useState(reduxCartItems);
 
     useEffect(() => {
         storeUniqueId(uniqueId);
     }, [uniqueId]);
 
+    // Fetch cart on mount
     useEffect(() => {
         const fetchCart = async () => {
             try {
@@ -26,15 +25,86 @@ export default function Cart({ uniqueId }: { uniqueId: string }) {
                 if (!response.ok) return;
 
                 const data = await response.json();
-                setCartItems(data.items); // update local UI
-                dispatch(setCart(data.items)); // keep Redux in sync
+                setCartItems(data.items);
+                dispatch(setCart(data.items));
             } catch (err) {
                 console.error('Failed to fetch cart:', err);
             }
         };
-
         fetchCart();
     }, [uniqueId, dispatch]);
+
+   /** ✅ Update Quantity **/
+const handleQuantityChange = async (itemId: number, newQuantity: number) => {
+    if (newQuantity < 1) return;
+
+    try {
+        const response = await fetch(`/${uniqueId}/update-cart-item-quantity`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement)?.content || ''
+            },
+            body: JSON.stringify({
+                food_item_id: itemId,
+                quantity: newQuantity,
+            }),
+        });
+
+        if (!response.ok) {
+            console.error('Failed to update quantity');
+            return;
+        }
+
+        const data = await response.json();
+
+        // ✅ Match new format from backend: { items: [], total: number }
+        setCartItems(data.items);
+        dispatch(setCart(data.items));
+
+    } catch (err) {
+        console.error('Error updating quantity:', err);
+    }
+};
+
+/** 🗑️ Remove Item **/
+const handleRemoveItem = async (itemId: number) => {
+    try {
+        const response = await fetch(`/${uniqueId}/remove-from-cart`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement)?.content || ''
+            },
+            body: JSON.stringify({
+                food_item_id: itemId,
+            }),
+        });
+
+        if (!response.ok) {
+            console.error('Failed to remove item');
+            return;
+        }
+
+        const data = await response.json();
+
+        // ✅ Match new format
+        setCartItems(data.items);
+        dispatch(setCart(data.items));
+
+    } catch (err) {
+        console.error('Error removing item:', err);
+    }
+};
+
+
+    /** 💳 Checkout **/
+    const handleOnCheckOutClick = () => {
+        dispatch(clearCart());
+        router.get(`/${uniqueId}/checkout`);
+    };
 
     return (
         <CustomerSideBarLayout>
@@ -57,12 +127,9 @@ export default function Cart({ uniqueId }: { uniqueId: string }) {
                     {/* Items */}
                     <div className="divide-y divide-gray-200">
                         {cartItems.map((item) => (
-                            <div
-                                key={item.id}
-                                className="grid cursor-pointer grid-cols-12 items-center px-6 py-4 transition-all hover:bg-gray-200/60"
-                            >
+                            <div key={item.id} className="grid grid-cols-12 items-center px-6 py-4 transition-all hover:bg-gray-200/60">
                                 {/* Product */}
-                                <div className="col-span-6 flex items-center">
+                                <div className="col-span-5 flex items-center">
                                     <img src={`/storage/${item.image}`} alt={item.name} className="h-16 w-16 rounded-md object-cover shadow" />
                                     <div className="ml-4">
                                         <h2 className="text-base font-medium text-gray-800">{item.name}</h2>
@@ -73,16 +140,34 @@ export default function Cart({ uniqueId }: { uniqueId: string }) {
                                 {/* Price */}
                                 <div className="col-span-2 text-center text-gray-700">${item.price}</div>
 
-                                {/* Quantity */}
-                                <div className="col-span-2 text-center">
-                                    <span className="inline-block rounded-lg bg-gray-100 px-3 py-1 text-sm font-medium text-gray-700">
-                                        {item.quantity}
-                                    </span>
+                                {/* Quantity Controls */}
+                                <div className="col-span-3 flex items-center justify-center space-x-3">
+                                    <button
+                                        onClick={() => handleQuantityChange(item.id, item.quantity - 1)}
+                                        className="rounded-full bg-gray-200 px-2 py-1 text-lg font-bold text-gray-700 hover:bg-gray-300"
+                                    >
+                                        −
+                                    </button>
+                                    <span className="inline-block w-6 text-center text-sm font-medium text-gray-700">{item.quantity}</span>
+                                    <button
+                                        onClick={() => handleQuantityChange(item.id, item.quantity + 1)}
+                                        className="rounded-full bg-gray-200 px-2 py-1 text-lg font-bold text-gray-700 hover:bg-gray-300"
+                                    >
+                                        +
+                                    </button>
                                 </div>
 
                                 {/* Subtotal */}
-                                <div className="col-span-2 text-right font-semibold text-gray-900">
-                                    ${item.subtotal ? item.subtotal.toFixed(2) : 0}
+                                <div className="col-span-1 text-right font-semibold text-gray-900">${(item.price * item.quantity).toFixed(2)}</div>
+
+                                {/* Remove Button */}
+                                <div className="col-span-1 text-right">
+                                    <button
+                                        onClick={() => handleRemoveItem(item.id)}
+                                        className="rounded-md bg-red-100 px-2 py-1 text-sm text-red-600 hover:bg-red-200"
+                                    >
+                                        Remove
+                                    </button>
                                 </div>
                             </div>
                         ))}
@@ -92,7 +177,7 @@ export default function Cart({ uniqueId }: { uniqueId: string }) {
                     <div className="flex items-center justify-between border-t bg-gray-400/30 px-6 py-4">
                         <span className="text-lg font-semibold">Total</span>
                         <span className="text-xl font-bold text-green-600">
-                            ${cartItems.reduce((sum, item) => sum + (item.subtotal ? item.subtotal : 0), 0).toFixed(2)}
+                            ${cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0).toFixed(2)}
                         </span>
                     </div>
 
@@ -100,16 +185,16 @@ export default function Cart({ uniqueId }: { uniqueId: string }) {
                     <div className="mt-4 flex justify-evenly px-6 pb-6">
                         <button
                             onClick={() => router.get(`/${uniqueId}/home`)}
-                            className="mr-4 w-full max-w-xs cursor-pointer rounded-lg bg-gray-200 px-6 py-2 font-semibold text-gray-700 shadow transition hover:bg-gray-300"
+                            className="mr-4 w-full max-w-xs rounded-lg bg-gray-200 px-6 py-2 font-semibold text-gray-700 shadow transition hover:bg-gray-300"
                         >
                             Back
                         </button>
-                        <Link
-                            href={`/${uniqueId}/checkout`}
-                            className="btn-primary flex w-full max-w-xs cursor-pointer justify-center rounded-lg font-semibold shadow transition"
+                        <button
+                            onClick={() => handleOnCheckOutClick()}
+                            className="btn-primary flex w-full max-w-xs justify-center rounded-lg font-semibold shadow transition"
                         >
                             Proceed to Checkout
-                        </Link>
+                        </button>
                     </div>
                 </div>
             )}
