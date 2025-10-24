@@ -6,6 +6,7 @@ import { clearCart, setCart } from '@/store/cartSlice';
 import { Head, router } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { toast } from 'sonner';
 
 export default function Cart({ uniqueId }: { uniqueId: string }) {
     const reduxCartItems = useSelector((state: RootState) => state.cart.items);
@@ -34,71 +35,72 @@ export default function Cart({ uniqueId }: { uniqueId: string }) {
         fetchCart();
     }, [uniqueId, dispatch]);
 
-   /** ✅ Update Quantity **/
-const handleQuantityChange = async (itemId: number, newQuantity: number) => {
-    if (newQuantity < 1) return;
+    /** ✅ Update Quantity **/
+    const handleQuantityChange = async (itemId: number, newQuantity: number) => {
+        if (newQuantity < 1) return;
 
-    try {
-        const response = await fetch(`/${uniqueId}/update-cart-item-quantity`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest',
-                'X-CSRF-TOKEN': (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement)?.content || ''
-            },
-            body: JSON.stringify({
-                food_item_id: itemId,
-                quantity: newQuantity,
-            }),
-        });
+        try {
+            const response = await fetch(`/${uniqueId}/update-cart-item-quantity`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement)?.content || '',
+                },
+                body: JSON.stringify({
+                    food_item_id: itemId,
+                    quantity: newQuantity,
+                }),
+            });
 
-        if (!response.ok) {
-            console.error('Failed to update quantity');
-            return;
+            if (!response.ok) {
+                toast.error('Failed to update quantity');
+                return;
+            }
+
+            const data = await response.json();
+
+            toast.success('Quantity updated successfully');
+
+            // ✅ Match new format from backend: { items: [], total: number }
+            setCartItems(data.items);
+            dispatch(setCart(data.items));
+        } catch (err) {
+            toast.error('Error updating quantity');
         }
+    };
 
-        const data = await response.json();
+    /** 🗑️ Remove Item **/
+    const handleRemoveItem = async (itemId: number) => {
+        try {
+            const response = await fetch(`/${uniqueId}/remove-from-cart`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement)?.content || '',
+                },
+                body: JSON.stringify({
+                    food_item_id: itemId,
+                }),
+            });
 
-        // ✅ Match new format from backend: { items: [], total: number }
-        setCartItems(data.items);
-        dispatch(setCart(data.items));
+            if (!response.ok) {
+                toast.error('Failed to remove item');
+                return;
+            }
 
-    } catch (err) {
-        console.error('Error updating quantity:', err);
-    }
-};
+            const data = await response.json();
 
-/** 🗑️ Remove Item **/
-const handleRemoveItem = async (itemId: number) => {
-    try {
-        const response = await fetch(`/${uniqueId}/remove-from-cart`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest',
-                'X-CSRF-TOKEN': (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement)?.content || ''
-            },
-            body: JSON.stringify({
-                food_item_id: itemId,
-            }),
-        });
+            toast.success('Item removed successfully');
 
-        if (!response.ok) {
-            console.error('Failed to remove item');
-            return;
+            // ✅ Match new format
+            setCartItems(data.items);
+            dispatch(setCart(data.items));
+        } catch (err) {
+            toast.error('Error removing item');
         }
-
-        const data = await response.json();
-
-        // ✅ Match new format
-        setCartItems(data.items);
-        dispatch(setCart(data.items));
-
-    } catch (err) {
-        console.error('Error removing item:', err);
-    }
-};
-
+    };
 
     /** 💳 Checkout **/
     const handleOnCheckOutClick = () => {
@@ -109,7 +111,7 @@ const handleRemoveItem = async (itemId: number) => {
     return (
         <CustomerSideBarLayout uniqueId={uniqueId}>
             <Head title="Cart" />
-            <CustomerSidebarHeader uniqueId={uniqueId}/>
+            <CustomerSidebarHeader uniqueId={uniqueId} />
 
             {cartItems.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-16">
@@ -126,51 +128,102 @@ const handleRemoveItem = async (itemId: number) => {
 
                     {/* Items */}
                     <div className="divide-y divide-gray-200">
-                        {cartItems.map((item) => (
-                            <div key={item.id} className="grid grid-cols-12 items-center px-6 py-4 transition-all hover:bg-gray-200/60">
-                                {/* Product */}
-                                <div className="col-span-5 flex items-center">
-                                    <img src={`/storage/${item.image}`} alt={item.name} className="h-16 w-16 rounded-md object-cover shadow" />
-                                    <div className="ml-4">
-                                        <h2 className="text-base font-medium text-gray-800">{item.name}</h2>
-                                        <p className="text-sm text-gray-500">ID: {item.id}</p>
+                        {cartItems.map((item) => {
+                            const addonsCost = item.addons?.reduce((sum, a) => sum + Number(a.price || 0), 0) || 0;
+                            const extrasCost = item.extras?.reduce((sum, e) => sum + Number(e.price || 0) * Number(e.quantity || 0), 0) || 0;
+                            const calculatedSubtotal = (Number(item.price * item.quantity) + addonsCost + extrasCost);
+
+                            return (
+                                <div key={item.id} className=''>
+                                    <div className="grid grid-cols-12 items-center px-6 py-4 transition-all hover:bg-gray-200/60 border-b border-amber-200">
+                                        {/* Product */}
+                                        <div className="col-span-5 flex items-center">
+                                            <img
+                                                src={`/storage/${item.image}`}
+                                                alt={item.name}
+                                                className="h-16 w-16 rounded-md object-cover shadow"
+                                            />
+                                            <div className="ml-4">
+                                                <h2 className="text-base font-medium text-gray-800">{item.name}</h2>
+                                                <p className="text-sm text-gray-500">ID: {item.id}</p>
+                                            </div>
+                                        </div>
+
+                                        {/* Price */}
+                                        <div className="col-span-2 text-center text-gray-700">${item.price}</div>
+
+                                        {/* Quantity */}
+                                        <div className="col-span-3 flex items-center justify-center space-x-3">
+                                            <button
+                                                onClick={() => handleQuantityChange(item.id, item.quantity - 1)}
+                                                className="rounded-full bg-gray-200 px-2 py-1 text-lg font-bold text-gray-700 hover:bg-gray-300"
+                                            >
+                                                −
+                                            </button>
+                                            <span className="inline-block w-6 text-center text-sm font-medium text-gray-700">{item.quantity}</span>
+                                            <button
+                                                onClick={() => handleQuantityChange(item.id, item.quantity + 1)}
+                                                className="rounded-full bg-gray-200 px-2 py-1 text-lg font-bold text-gray-700 hover:bg-gray-300"
+                                            >
+                                                +
+                                            </button>
+                                        </div>
+
+                                        {/* ✅ Updated Subtotal (includes addons + extras) */}
+                                        <div className="col-span-1 text-right font-semibold text-gray-900">${calculatedSubtotal.toFixed(2)}</div>
+
+                                        {/* Remove */}
+                                        <div className="col-span-1 text-right">
+                                            <button
+                                                onClick={() => handleRemoveItem(item.id)}
+                                                className="rounded-md bg-red-100 px-2 py-1 text-sm text-red-600 hover:bg-red-200"
+                                            >
+                                                Remove
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    {/* ✅ Addons + Extras Section */}
+                                    <div className="px-6 pb-4 text-sm">
+                                        {/* Addons */}
+                                        {item.addons && item.addons?.length > 0 && (
+                                            <div className="mt-2">
+                                                <h4 className="mb-1 font-medium text-gray-700">Addons:</h4>
+                                                <div className="flex flex-wrap gap-2">
+                                                    {item.addons.map((addon, index) => (
+                                                        <span
+                                                            key={index}
+                                                            className="rounded-md border border-yellow-300 bg-yellow-100 px-2 py-1 text-xs text-yellow-800"
+                                                        >
+                                                            {addon.name} (+${addon.price})
+                                                        </span>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* Extras */}
+                                        {item.extras && item.extras?.length > 0 && (
+                                            <div className="mt-2">
+                                                <h4 className="mb-1 font-medium text-gray-700">Extras:</h4>
+                                                <ul className="space-y-1 text-gray-600">
+                                                    {item.extras.map((extra, idx) => (
+                                                        <li key={idx} className="flex justify-between">
+                                                            <span>
+                                                                {extra.name} × {extra.quantity}
+                                                            </span>
+                                                            <span className="font-semibold text-gray-800">
+                                                                +${(extra.price * extra.quantity).toFixed(2)}
+                                                            </span>
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
-
-                                {/* Price */}
-                                <div className="col-span-2 text-center text-gray-700">${item.price}</div>
-
-                                {/* Quantity Controls */}
-                                <div className="col-span-3 flex items-center justify-center space-x-3">
-                                    <button
-                                        onClick={() => handleQuantityChange(item.id, item.quantity - 1)}
-                                        className="rounded-full bg-gray-200 px-2 py-1 text-lg font-bold text-gray-700 hover:bg-gray-300"
-                                    >
-                                        −
-                                    </button>
-                                    <span className="inline-block w-6 text-center text-sm font-medium text-gray-700">{item.quantity}</span>
-                                    <button
-                                        onClick={() => handleQuantityChange(item.id, item.quantity + 1)}
-                                        className="rounded-full bg-gray-200 px-2 py-1 text-lg font-bold text-gray-700 hover:bg-gray-300"
-                                    >
-                                        +
-                                    </button>
-                                </div>
-
-                                {/* Subtotal */}
-                                <div className="col-span-1 text-right font-semibold text-gray-900">${(item.price * item.quantity).toFixed(2)}</div>
-
-                                {/* Remove Button */}
-                                <div className="col-span-1 text-right">
-                                    <button
-                                        onClick={() => handleRemoveItem(item.id)}
-                                        className="rounded-md bg-red-100 px-2 py-1 text-sm text-red-600 hover:bg-red-200"
-                                    >
-                                        Remove
-                                    </button>
-                                </div>
-                            </div>
-                        ))}
+                            );
+                        })}
                     </div>
 
                     {/* Footer / Total */}

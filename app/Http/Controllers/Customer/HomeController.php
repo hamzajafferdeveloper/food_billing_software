@@ -12,7 +12,7 @@ class HomeController extends Controller
 {
     public function home(string $unique_id)
     {
-        $food_items = FoodItem::paginate(12);
+        $food_items = FoodItem::with('addons', 'extras')->paginate(12);
 
         return Inertia::render('customer/home', [
             'uniqueId' => $unique_id,
@@ -29,7 +29,7 @@ class HomeController extends Controller
 
         $food_items = FoodItem::when($category, function ($query, $category) {
             $query->where('category_id', $category->id);
-        })->paginate(12)->withQueryString();
+        })->with('addons', 'extras')->paginate(12)->withQueryString();
 
         return Inertia::render('customer/all-items', [
             'uniqueId' => $unique_id,

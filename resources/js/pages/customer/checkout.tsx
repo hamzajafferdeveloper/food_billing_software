@@ -10,9 +10,9 @@ export default function CheckOut({ uniqueId, order }: { uniqueId: string; order:
     }, [uniqueId]);
 
     return (
-        <CustomerSideBarLayout>
+        <CustomerSideBarLayout uniqueId={uniqueId}>
             <Head title="CheckOut" />
-            <CustomerSidebarHeader />
+            <CustomerSidebarHeader uniqueId={uniqueId} />
             <section className="flex mt-40 items-center justify-center">
                 <div className="w-full max-w-lg border border-gray-200">
                     <h1 className="bg-[#fce0a2] p-4 text-center font-bold text-[#171717]">Make Payment</h1>

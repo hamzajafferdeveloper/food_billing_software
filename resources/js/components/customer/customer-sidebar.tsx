@@ -9,8 +9,6 @@ import AppLogo from '../app-logo';
 
 export function CustomerSideBar({ uniqueId }: { uniqueId: string }) {
 
-    console.log('uniqueId', uniqueId)
-
     const mainNavItems: NavItem[] = [
         {
             title: 'Home',

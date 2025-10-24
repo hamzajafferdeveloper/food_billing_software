@@ -9,6 +9,9 @@ interface CartItem {
     image?: string;
     subtotal?: number;
     instructions?: string;
+    addons?: { item_id: number; name: string; price: number }[];
+    extras?: { item_id: number; quantity: number; name: string; price: number }[];
+    totalPrice?: number;
 }
 
 interface CartState {

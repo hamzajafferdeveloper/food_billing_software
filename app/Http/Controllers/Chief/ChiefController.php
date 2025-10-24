@@ -34,6 +34,8 @@ class ChiefController extends Controller
         try {
             $order = Order::with(['customer', 'payment', 'cart'])->findOrFail($id);
 
+
+
             $cart = $order->cart;
             $items = collect($cart->cart_items ?? [])->map(function ($item) {
                 $food = FoodItem::find($item['food_item_id']);
@@ -47,6 +49,9 @@ class ChiefController extends Controller
                         'price' => $food->price,
                         'image' => $food->image ?? null,
                     ] : null,
+                    'addons' => $item['addons'] ?? [],
+                    'extras' => $item['extras'] ?? [],
+                    // 'totalPrice' => $item['totalPrice'],
                 ];
             });
 

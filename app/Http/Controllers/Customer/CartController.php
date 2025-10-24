@@ -19,14 +19,24 @@ class CartController extends Controller
             'food_item_id' => 'required|integer|exists:food_items,id',
             'quantity' => 'required|integer|min:1',
             'instructions' => 'nullable|string',
+            'addons' => 'nullable|array',
+            'addons.*.name' => 'required_with:addons|string',
+            'addons.*.price' => 'required_with:addons|numeric|min:0',
+            'extras' => 'nullable|array',
+            'extras.*.name' => 'required_with:extras|string',
+            'extras.*.price' => 'required_with:extras|numeric|min:0',
+            'extras.*.quantity' => 'required_with:extras|integer|min:1',
         ]);
 
         $cart = Cart::firstOrCreate(['customer_id' => $unique_id], ['cart_items' => []]);
-
         $items = $cart->cart_items ?? [];
 
-        // check if already exists
-        $index = collect($items)->search(fn ($i) => $i['food_item_id'] == $validated['food_item_id']);
+        // Match item + same addons/extras to avoid duplicates
+        $index = collect($items)->search(function ($item) use ($validated) {
+            return $item['food_item_id'] == $validated['food_item_id']
+                && json_encode($item['addons'] ?? []) == json_encode($validated['addons'] ?? [])
+                && json_encode($item['extras'] ?? []) == json_encode($validated['extras'] ?? []);
+        });
 
         if ($index !== false) {
             $items[$index]['quantity'] += $validated['quantity'];
@@ -34,13 +44,15 @@ class CartController extends Controller
             $items[] = [
                 'food_item_id' => $validated['food_item_id'],
                 'quantity' => $validated['quantity'],
-                'instructions' => $validated['instructions'],
+                'instructions' => $validated['instructions'] ?? '',
+                'addons' => $validated['addons'] ?? [],
+                'extras' => $validated['extras'] ?? []
             ];
         }
 
-        $cart->update(['cart_items' => $items]);
+        $cart->update(['cart_items' => array_values($items)]);
 
-        return back();
+        return back()->with('success', 'Item added to cart!');
     }
 
     public function updateCartItem(Request $request, string $unique_id)
@@ -49,23 +61,37 @@ class CartController extends Controller
             'food_item_id' => 'required|integer|exists:food_items,id',
             'quantity' => 'required|integer|min:1',
             'instructions' => 'nullable|string',
+            'addons' => 'nullable|array',
+            'addons.*.name' => 'required_with:addons|string',
+            'addons.*.price' => 'required_with:addons|numeric|min:0',
+            'extras' => 'nullable|array',
+            'extras.*.name' => 'required_with:extras|string',
+            'extras.*.price' => 'required_with:extras|numeric|min:0',
+            'extras.*.quantity' => 'required_with:extras|integer|min:1',
+            'totalPrice' => 'required|numeric|min:0',
         ]);
 
         $cart = Cart::firstOrCreate(['customer_id' => $unique_id], ['cart_items' => []]);
-
         $items = $cart->cart_items ?? [];
 
-        $index = collect($items)->search(fn ($i) => $i['food_item_id'] == $validated['food_item_id']);
+        $index = collect($items)->search(fn($i) => $i['food_item_id'] == $validated['food_item_id']);
 
         if ($index !== false) {
-            $items[$index]['quantity'] = $validated['quantity']; // ✅ Replace instead of increase
-            $items[$index]['instructions'] = $validated['instructions'];
+            $items[$index] = [
+                ...$items[$index], // Keep existing if any
+                'quantity' => $validated['quantity'],
+                'instructions' => $validated['instructions'] ?? '',
+                'addons' => $validated['addons'] ?? [],
+                'extras' => $validated['extras'] ?? [],
+                'totalPrice' => $validated['totalPrice'],
+            ];
         }
 
-        $cart->update(['cart_items' => $items]);
+        $cart->update(['cart_items' => array_values($items)]);
 
         return back()->with('success', 'Cart updated!');
     }
+
 
     public function updateCartQuantity(Request $request, string $unique_id)
     {
@@ -158,6 +184,8 @@ class CartController extends Controller
                 'quantity' => $item['quantity'],
                 'subtotal' => $food->price * $item['quantity'],
                 'instructions' => $item['instructions'],
+                'addons' => $item['addons'],
+                'extras' => $item['extras'],
             ];
         })->filter(); // remove nulls if a food item was deleted
 
@@ -166,43 +194,6 @@ class CartController extends Controller
             'total' => $items->sum('subtotal'),
         ]);
     }
-    // public function getCart(string $unique_id)
-    // {
-
-    //     try {
-    //         $cart = Cart::where('customer_id', $unique_id)->first();
-
-    //         $order = Order::where('card_id', $cart->id)->first();
-
-    //         if ($order) {
-    //             return response()->json([
-    //                 'items' => [],
-    //                 'total' => 0,
-    //             ], 200);
-    //         }
-
-    //         // hydrate with food details
-    //         $items = collect($cart->cart_items ?? [])->map(function ($item) {
-    //             $food = FoodItem::find($item['food_item_id']);
-
-    //             return [
-    //                 'id' => $food->id,
-    //                 'name' => $food->name,
-    //                 'price' => $food->price,
-    //                 'image' => $food->image,
-    //                 'quantity' => $item['quantity'],
-    //                 'subtotal' => $food->price * $item['quantity'],
-    //             ];
-    //         });
-
-    //         return response()->json([
-    //             'items' => $items,
-    //             'total' => $items->sum('subtotal'),
-    //         ]);
-    //     } catch (Exception $e) {
-    //         Log::error($e->getMessage());
-    //     }
-    // }
 
     public function checkout(Request $request, string $unique_id)
     {

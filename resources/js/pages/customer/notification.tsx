@@ -40,9 +40,9 @@ export default function Notification({ uniqueId }: { uniqueId: string }) {
     }, [uniqueId]);
 
     return (
-        <CustomerSideBarLayout>
+        <CustomerSideBarLayout uniqueId={uniqueId}>
             <Head title="Order Status" />
-            <CustomerSidebarHeader />
+            <CustomerSidebarHeader uniqueId={uniqueId} />
 
             <section className="flex mt-40 items-center justify-center">
                 <div className="text-center">

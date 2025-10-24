@@ -3,6 +3,7 @@ import { newOrder } from '@/routes/chief';
 import { type BreadcrumbItem } from '@/types';
 import { Head, router } from '@inertiajs/react';
 import { useEffect, useRef, useState } from 'react';
+import { toast } from 'sonner';
 
 const breadcrumbs: BreadcrumbItem[] = [{ title: 'New Orders', href: newOrder().url }];
 
@@ -32,6 +33,18 @@ interface Order {
                 price: number;
                 image?: string;
             };
+            addons?: {
+                item_id: number;
+                name: string;
+                price: number;
+            }[];
+            extras?: {
+                item_id: number;
+                quantity: number;
+                name: string;
+                price: number;
+            }[];
+            totalPrice?: number;
         }[];
     };
     payment?: {
@@ -94,11 +107,11 @@ export default function NewOrder() {
             {},
             {
                 onSuccess: () => {
-                    alert('✅ Order confirmed!');
+                    toast.success('Order Confirmed Successfully');
                     setSelectedOrder(null);
                     fetchOrders();
                 },
-                onError: () => alert('❌ Failed to confirm order.'),
+                onError: () => toast.error('Failed to Confirm Order'),
             },
         );
     };
@@ -115,24 +128,25 @@ export default function NewOrder() {
             {},
             {
                 onSuccess: () => {
-                    alert('⚠️ Order declined!');
+                    toast.success('Order Declined Successfully');
                     setConfirmModal({ open: false, id: null });
                     setSelectedOrder(null);
                     fetchOrders();
                 },
-                onError: () => alert('❌ Failed to decline order.'),
+                onError: () => toast.error('Failed to Decline Order'),
             },
         );
     };
 
-    if (loading)
+    if (error)
         return (
-            <div className="flex h-64 items-center justify-center">
-                <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#fce0a2] border-t-transparent"></div>
-            </div>
+            <>
+                <ChiefSidebarLayout breadcrumbs={breadcrumbs}>
+                    <Head title="Dashboard" />
+                    <div className="py-6 text-center font-semibold text-red-500">{error}</div>
+                </ChiefSidebarLayout>
+            </>
         );
-
-    if (error) return <div className="py-6 text-center font-semibold text-red-500">{error}</div>;
 
     return (
         <ChiefSidebarLayout breadcrumbs={breadcrumbs}>
@@ -142,7 +156,9 @@ export default function NewOrder() {
             <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
                 <div className="mx-auto mt-10 w-full px-5">
                     <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
-                        {orders.map((order) => (
+                       {orders.length > 0 ? (
+                           <>
+                            {orders.map((order) => (
                             <div
                                 key={order.id}
                                 className="rounded-xl bg-white p-6 shadow-lg transition duration-300 hover:shadow-2xl dark:bg-gray-900"
@@ -182,90 +198,176 @@ export default function NewOrder() {
                                 </button>
                             </div>
                         ))}
+                           </>
+                       ): (
+                        <p className="py-6 text-center font-semibold text-gray-500">No New orders found.</p>
+                       )}
                     </div>
                 </div>
             </div>
 
+            {loading && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm">
+                    <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#fce0a2] border-t-transparent"></div>
+                </div>
+            )}
+
             {/* Order Details Modal */}
             {selectedOrder && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-                    <div ref={modalRef} className="w-full max-w-lg rounded-xl bg-white p-6 shadow-xl dark:bg-gray-900">
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm">
+                    <div
+                        ref={modalRef}
+                        className="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-xl border border-gray-200 bg-white p-6 shadow-xl dark:border-gray-700 dark:bg-gray-900"
+                    >
+                        {/* Modal Header */}
                         <div className="flex items-center justify-between border-b pb-3">
-                            <h2 className="text-xl font-semibold text-gray-800 dark:text-white">Order #{selectedOrder.id} Details</h2>
+                            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Order #{selectedOrder.id}</h2>
                             <button
                                 onClick={() => setSelectedOrder(null)}
-                                className="rounded-full bg-gray-200 px-3 py-1 text-gray-700 transition hover:bg-gray-300 dark:bg-gray-700 dark:text-white"
+                                className="rounded-full bg-gray-200 p-1 px-2 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600"
                             >
                                 ✕
                             </button>
                         </div>
 
-                        <div className="mt-4">
-                            <p className="text-gray-600 dark:text-gray-300">
-                                <span className="font-semibold">Table:</span> #{selectedOrder.customer?.table_id ?? '—'}
+                        {/* Customer Info */}
+                        <div className="mt-4 grid grid-cols-2 gap-y-2 text-gray-700 dark:text-gray-300">
+                            <p>
+                                <strong className="font-medium">Table:</strong> #{selectedOrder.customer?.table_id ?? '—'}
                             </p>
-                            <p className="text-gray-600 dark:text-gray-300">
-                                <span className="font-semibold">Total Amount:</span> {selectedOrder.total_amount}
+                            <p>
+                                <strong className="font-medium">Total:</strong> {selectedOrder.total_amount}
                             </p>
+                            <p>
+                                <strong className="font-medium">Sender:</strong> {selectedOrder.payment?.sender_number}
+                            </p>
+                            <p>
+                                <strong className="font-medium">Transaction ID:</strong> {selectedOrder.payment?.transaction_id}
+                            </p>
+                        </div>
 
-                            {/* Cart Items */}
-                            <h3 className="mt-4 text-lg font-semibold text-gray-800 dark:text-white">Cart Items</h3>
+                        {/* Cart Items */}
+                        <h3 className="mt-6 text-lg font-semibold text-gray-900 dark:text-white">Cart Items</h3>
 
-                            {selectedOrder.cart?.cart_items?.length ? (
-                                <div className="mt-4 rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
-                                    <div className="divide-y divide-gray-200 dark:divide-gray-700">
-                                        {selectedOrder.cart.cart_items.map((item, idx) => (
-                                            <div
-                                                key={idx}
-                                                className="flex items-center justify-between px-4 py-3 transition-all duration-150 hover:bg-gray-50 dark:hover:bg-gray-700/50"
-                                            >
-                                                <div className="flex items-center gap-3">
-                                                    {item.food_item?.image && (
-                                                        <img
-                                                            src={`/storage/${item.food_item.image}`}
-                                                            alt={item.food_item.name}
-                                                            className="h-10 w-10 rounded-lg object-cover"
-                                                        />
-                                                    )}
-                                                    <div>
-                                                        <p className="text-sm font-medium text-gray-800 dark:text-gray-100">
-                                                            {item.food_item?.name ?? `Item #${item.food_item_id}`}
-                                                        </p>
-                                                        <p className="text-xs text-gray-500 dark:text-gray-400">Rs. {item.food_item?.price ?? '-'}</p>
-                                                    </div>
+                        <div className="mt-3 space-y-4">
+                            {selectedOrder.cart?.cart_items?.map((item, idx) => {
+                                const addonsCost = item.addons?.reduce((sum, a) => sum + Number(a.price || 0), 0) || 0;
+                                const extrasCost = item.extras?.reduce((sum, e) => sum + Number(e.price || 0) * Number(e.quantity || 0), 0) || 0;
+                                // @ts-ignore
+                                const calculatedSubtotal = Number(item.food_item?.price * item.quantity) + addonsCost + extrasCost;
+                                return (
+                                    <div
+                                        key={idx}
+                                        className="rounded-xl border border-gray-300 bg-white p-5 shadow-md transition hover:shadow-lg dark:border-gray-700 dark:bg-gray-900"
+                                    >
+                                        {/* ✅ Main Food Row */}
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex items-center gap-4">
+                                                {item.food_item?.image && (
+                                                    <img
+                                                        src={`/storage/${item.food_item.image}`}
+                                                        className="h-16 w-16 rounded-lg object-cover shadow"
+                                                    />
+                                                )}
+                                                <div>
+                                                    <h4 className="text-lg font-semibold text-gray-800 dark:text-white">{item.food_item?.name}</h4>
+                                                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                                                        Base Price: Rs. {item.food_item?.price}
+                                                    </p>
                                                 </div>
-                                                <span className="rounded-full bg-gray-100 px-3 py-1 text-sm font-semibold text-gray-700 dark:bg-gray-700 dark:text-gray-200">
-                                                    x{item.quantity}
-                                                </span>
                                             </div>
-                                        ))}
+
+                                            <span className="rounded-full bg-yellow-200 px-4 py-1 text-sm font-bold text-gray-900 dark:bg-yellow-500 dark:text-black">
+                                                Qty: {item.quantity}
+                                            </span>
+                                        </div>
+
+                                        {/* ✅ Addons Section */}
+                                        <div className="mt-4">
+                                            <p className="mb-2 text-sm font-semibold tracking-wide text-gray-600 uppercase dark:text-gray-300">
+                                                Add-ons
+                                            </p>
+
+                                            {item.addons && item.addons.length > 0 ? (
+                                                <div className="space-y-2">
+                                                    {item.addons.map((addon, i) => (
+                                                        <div
+                                                            key={i}
+                                                            className="flex justify-between rounded-lg bg-gray-100 px-3 py-2 text-sm dark:bg-gray-700"
+                                                        >
+                                                            <span className="text-gray-800 dark:text-gray-200">➕ {addon.name}</span>
+                                                            <span className="font-semibold text-gray-900 dark:text-white">Rs. {addon.price}</span>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            ) : (
+                                                <p className="text-sm text-gray-500 italic dark:text-gray-400">No Add-ons selected</p>
+                                            )}
+                                        </div>
+
+                                        {/* ✅ Extras Section */}
+                                        <div className="mt-4">
+                                            <p className="mb-2 text-sm font-semibold tracking-wide text-gray-600 uppercase dark:text-gray-300">
+                                                Extras
+                                            </p>
+
+                                            {item.extras && item.extras.length > 0 ? (
+                                                <div className="space-y-2">
+                                                    {item.extras.map((extra, i) => (
+                                                        <div
+                                                            key={i}
+                                                            className="flex justify-between rounded-lg bg-blue-50 px-3 py-2 text-sm dark:bg-blue-800/40"
+                                                        >
+                                                            <span className="text-gray-800 dark:text-gray-200">
+                                                                ⚡ {extra.name} × {extra.quantity}
+                                                            </span>
+                                                            <span className="font-semibold text-gray-900 dark:text-white">
+                                                                Rs. {Number(extra.price) * Number(extra.quantity)}
+                                                            </span>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            ) : (
+                                                <p className="text-sm text-gray-500 italic dark:text-gray-400">No Extras selected</p>
+                                            )}
+                                        </div>
+
+                                        {/* ✅ Subtotal */}
+                                        <div className="mt-5 flex justify-end border-t pt-3 dark:border-gray-700">
+                                            <span className="text-md font-bold text-gray-900 dark:text-white">Subtotal: Rs. ${calculatedSubtotal}</span>
+                                        </div>
                                     </div>
-                                </div>
-                            ) : (
-                                <p className="mt-3 text-center text-sm text-gray-500 italic dark:text-gray-400">No food items found in this order.</p>
-                            )}
+                                );
+                            })}
                         </div>
 
                         {/* Action Buttons */}
                         <div className="mt-6 flex justify-end gap-3">
                             <button
                                 onClick={() => setSelectedOrder(null)}
-                                className="rounded-lg bg-gray-200 px-4 py-2 font-semibold text-gray-700 transition hover:bg-gray-300"
+                                className="rounded-lg bg-gray-200 px-4 py-2 font-semibold text-gray-700 hover:bg-gray-300"
                             >
                                 Close
                             </button>
+
                             <button
                                 onClick={() => declineOrder(selectedOrder.id)}
-                                className="rounded-lg bg-red-500 px-4 py-2 font-semibold text-white transition hover:bg-red-600"
+                                className="rounded-lg bg-red-600 px-4 py-2 font-semibold text-white hover:bg-red-700"
                             >
                                 Decline
                             </button>
-                                <button
-                                    onClick={() => confirmOrder(selectedOrder.id)}
-                                    className={`rounded-lg bg-green-500 px-4 py-2 font-semibold cursor-pointer transition ${selectedOrder.payment_status === 'pending' ? 'hover:bg-green-600 text-red-800 opacity-50 pointer-events-none' : 'hover:bg-green-600  text-white'} `}
-                                >
-                                    {selectedOrder.payment_status === 'pending' ? 'Payment Pending' : 'Confirm'}
-                                </button>
+
+                            <button
+                                onClick={() => confirmOrder(selectedOrder.id)}
+                                disabled={selectedOrder.payment_status === 'pending'}
+                                className={`rounded-lg px-4 py-2 font-semibold transition ${
+                                    selectedOrder.payment_status === 'pending'
+                                        ? 'cursor-not-allowed bg-gray-400 text-gray-700'
+                                        : 'bg-green-600 text-white hover:bg-green-700'
+                                }`}
+                            >
+                                {selectedOrder.payment_status === 'pending' ? 'Payment Pending' : 'Confirm'}
+                            </button>
                         </div>
                     </div>
                 </div>
