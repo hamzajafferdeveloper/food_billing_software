@@ -12,9 +12,9 @@ export default function Home({ uniqueId, foodItems }: { uniqueId: string; foodIt
     }, [uniqueId]);
 
     return (
-        <CustomerSideBarLayout>
+        <CustomerSideBarLayout uniqueId={uniqueId}>
             <Head title="Home" />
-            <CustomerSidebarHeader />
+            <CustomerSidebarHeader uniqueId={uniqueId} />
             <AllItemSection foodItems={foodItems} />
         </CustomerSideBarLayout>
     );

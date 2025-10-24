@@ -5,9 +5,8 @@ import { SidebarTrigger } from '../ui/sidebar';
 import { router } from '@inertiajs/react';
 import { getStoredUniqueId } from '@/lib/utils';
 
-export function CustomerSidebarHeader() {
+export function CustomerSidebarHeader({ uniqueId }: { uniqueId: string }) {
     const count = useSelector((state: RootState) => state.cart.items.reduce((sum, item) => sum + item.quantity, 0));
-    const uniqueId = getStoredUniqueId();
 
     return (
         <header className="w-full shrink-0 items-center gap-2 border-b border-sidebar-border px-6 py-2 transition-[width,height] ease-linear">

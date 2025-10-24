@@ -107,13 +107,13 @@ const handleRemoveItem = async (itemId: number) => {
     };
 
     return (
-        <CustomerSideBarLayout>
+        <CustomerSideBarLayout uniqueId={uniqueId}>
             <Head title="Cart" />
-            <CustomerSidebarHeader />
+            <CustomerSidebarHeader uniqueId={uniqueId}/>
 
             {cartItems.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-16">
-                    <img src="/images/empty-cart.svg" alt="Empty cart" className="mb-6 h-40 w-40 opacity-70" />
+                    <img src="/storage/images/empty-cart.jpg" alt="Empty cart" className="mb-6 h-40 w-40 opacity-70" />
                     <p className="text-lg font-medium text-gray-600">Your cart is empty 🛒</p>
                 </div>
             ) : (

@@ -29,13 +29,14 @@ class FoodItemController extends Controller
                     $q->where('name', 'like', "%{$search_query}%");
                 });
             })
+            ->with(['addons', 'extras'])
             ->paginate($perPage)
             ->appends(['per_page' => $perPage]);
 
         return Inertia::render('admin/food-item/index', [
             'itemsPagination' => $food_items,
-            'per_page'        => $perPage,
-            'categories' => $categories
+            'per_page' => $perPage,
+            'categories' => $categories,
         ]);
     }
 
@@ -45,31 +46,42 @@ class FoodItemController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name'        => 'required|string|max:255',
-            'price'       => 'required|numeric|min:0',
+            'name' => 'required|string|max:255',
+            'price' => 'required|numeric|min:0',
             'category_id' => 'required|exists:food_categories,id',
-            'image'       => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'addons' => 'nullable|string',
+            'extras' => 'nullable|string',
         ]);
 
         $imagePath = null;
-
         if ($request->hasFile('image')) {
-            // Generate unique file name
-            $filename = Str::uuid()->toString() . '.' . $request->file('image')->getClientOriginalExtension();
-
-            // Store the file in "public/food_categories"
-            $imagePath = $request->file('image')->storeAs('food_item', $filename, 'public');
+            $filename = Str::uuid().'.'.$request->file('image')->getClientOriginalExtension();
+            $imagePath = $request->file('image')->storeAs('food_items', $filename, 'public');
         }
 
-        FoodItem::create([
-            'name'  => $validated['name'],
+        $foodItem = FoodItem::create([
+            'name' => $validated['name'],
             'price' => $validated['price'],
             'category_id' => $validated['category_id'],
-            'image' => $imagePath, // will be null if no image uploaded
+            'image' => $imagePath,
         ]);
 
+        // ✅ Decode JSON into array
+        $addons = json_decode($request->addons, true) ?? [];
+        $extras = json_decode($request->extras, true) ?? [];
+
+        // ✅ Create individual child rows
+        foreach ($addons as $addon) {
+            $foodItem->addons()->create($addon);
+        }
+
+        foreach ($extras as $extra) {
+            $foodItem->extras()->create($extra);
+        }
+
         return redirect()->route('admin.food.item.index')
-            ->with('success', 'Food Category created successfully.');
+            ->with('success', 'Food Item created successfully ✅');
     }
 
     /**
@@ -77,38 +89,56 @@ class FoodItemController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        $validated = $request->validate([
-            'name'        => 'required|string|max:255',
-            'price'       => 'required|numeric|min:0',
-            'category_id' => 'required|exists:food_categories,id',
-            'image'       => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-        ]);
+        try {
+            $item = FoodItem::findOrFail($id);
+            $validated = $request->validate([
+                'name' => 'required|string|max:255',
+                'price' => 'required|numeric|min:0',
+                'category_id' => 'required|exists:food_categories,id',
+                'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
 
-        $category = FoodItem::findOrFail($id);
-        $imagePath = $category->image;
+                'addons' => 'nullable|string',
+                'extras' => 'nullable|string',
+            ]);
 
-        if ($request->hasFile('image')) {
-            // Delete old image if it exists
-            if ($category->image && Storage::disk('public')->exists($category->image)) {
-                Storage::disk('public')->delete($category->image);
+            // ✅ Update image only if new one uploaded
+            if ($request->hasFile('image')) {
+                if ($item->image && Storage::disk('public')->exists($item->image)) {
+                    Storage::disk('public')->delete($item->image);
+                }
+
+                $filename = Str::uuid().'.'.$request->file('image')->getClientOriginalExtension();
+                $item->image = $request->file('image')->storeAs('food_items', $filename, 'public');
             }
 
-            // Generate unique file name
-            $filename = Str::uuid()->toString() . '.' . $request->file('image')->getClientOriginalExtension();
+            // ✅ Update basic fields
+            $item->update([
+                'name' => $validated['name'],
+                'price' => $validated['price'],
+                'category_id' => $validated['category_id'],
+                'image' => $item->image, // ensures stored image persists
+            ]);
 
-            // Store the file in "public/food_categories"
-            $imagePath = $request->file('image')->storeAs('food_item', $filename, 'public');
+            // ✅ Decode JSON → safe fallback to empty array
+            $addons = json_decode($request->addons, true) ?? [];
+            $extras = json_decode($request->extras, true) ?? [];
+
+            // ✅ Remove old & insert new (hasMany)
+            $item->addons()->delete();
+            $item->extras()->delete();
+
+            foreach ($addons as $addon) {
+                $item->addons()->create($addon);
+            }
+
+            foreach ($extras as $extra) {
+                $item->extras()->create($extra);
+            }
+
+            return back()->with('success', 'Food Item updated ✅');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Error updating food item: '.$e->getMessage());
         }
-
-        $category->update([
-            'name'  => $validated['name'],
-            'price' => $validated['price'],
-            'category_id' => $validated['category_id'],
-            'image' => $imagePath, // will be null if no image uploaded
-        ]);
-
-        return redirect()->route('admin.food.item.index')
-            ->with('success', 'Food Category updated successfully.');
     }
 
     /**

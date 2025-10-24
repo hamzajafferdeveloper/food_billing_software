@@ -5,11 +5,11 @@ import { setCart } from "@/store/cartSlice";
 import { getStoredUniqueId } from '@/lib/utils';
 interface AppLayoutProps {
     children: ReactNode;
+    uniqueId: string;
 }
 
-export default ({ children, ...props }: AppLayoutProps) => {
+export default ({ uniqueId, children, ...props }: AppLayoutProps) => {
     const dispatch = useDispatch();
-    const uniqueId = getStoredUniqueId();
 
     useEffect(() => {
         const fetchCart = async () => {
@@ -26,7 +26,7 @@ export default ({ children, ...props }: AppLayoutProps) => {
         fetchCart();
     }, [dispatch]);
     return (
-        <CustomerSideBarLayout {...props}>
+        <CustomerSideBarLayout uniqueId={uniqueId} {...props}>
             {children}
         </CustomerSideBarLayout>
     );

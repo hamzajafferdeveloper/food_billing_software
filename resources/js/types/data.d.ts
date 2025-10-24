@@ -12,6 +12,8 @@ export interface FoodItem {
   price: number
   image?: string
   category_id: number
+  addons?: { name: string; price: number }[]
+  extras?: { name: string; price: number }[]
   created_at?: string
   updated_at?: string
 }

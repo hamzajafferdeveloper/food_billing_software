@@ -6,18 +6,19 @@ use App\Http\Controllers\Controller;
 use App\Models\Cart;
 use App\Models\FoodItem;
 use App\Models\Order;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
-use Exception;
 
-class CardController extends Controller
+class CartController extends Controller
 {
     public function addToCart(Request $request, string $unique_id)
     {
         $validated = $request->validate([
             'food_item_id' => 'required|integer|exists:food_items,id',
             'quantity' => 'required|integer|min:1',
+            'instructions' => 'nullable|string',
         ]);
 
         $cart = Cart::firstOrCreate(['customer_id' => $unique_id], ['cart_items' => []]);
@@ -25,7 +26,7 @@ class CardController extends Controller
         $items = $cart->cart_items ?? [];
 
         // check if already exists
-        $index = collect($items)->search(fn($i) => $i['food_item_id'] == $validated['food_item_id']);
+        $index = collect($items)->search(fn ($i) => $i['food_item_id'] == $validated['food_item_id']);
 
         if ($index !== false) {
             $items[$index]['quantity'] += $validated['quantity'];
@@ -33,12 +34,37 @@ class CardController extends Controller
             $items[] = [
                 'food_item_id' => $validated['food_item_id'],
                 'quantity' => $validated['quantity'],
+                'instructions' => $validated['instructions'],
             ];
         }
 
         $cart->update(['cart_items' => $items]);
 
         return back();
+    }
+
+    public function updateCartItem(Request $request, string $unique_id)
+    {
+        $validated = $request->validate([
+            'food_item_id' => 'required|integer|exists:food_items,id',
+            'quantity' => 'required|integer|min:1',
+            'instructions' => 'nullable|string',
+        ]);
+
+        $cart = Cart::firstOrCreate(['customer_id' => $unique_id], ['cart_items' => []]);
+
+        $items = $cart->cart_items ?? [];
+
+        $index = collect($items)->search(fn ($i) => $i['food_item_id'] == $validated['food_item_id']);
+
+        if ($index !== false) {
+            $items[$index]['quantity'] = $validated['quantity']; // ✅ Replace instead of increase
+            $items[$index]['instructions'] = $validated['instructions'];
+        }
+
+        $cart->update(['cart_items' => $items]);
+
+        return back()->with('success', 'Cart updated!');
     }
 
     public function updateCartQuantity(Request $request, string $unique_id)
@@ -52,7 +78,7 @@ class CardController extends Controller
         $items = $cart->cart_items ?? [];
 
         // Find the item
-        $index = collect($items)->search(fn($i) => $i['food_item_id'] == $validated['food_item_id']);
+        $index = collect($items)->search(fn ($i) => $i['food_item_id'] == $validated['food_item_id']);
 
         if ($index === false) {
             return response()->json(['message' => 'Item not found in cart'], 404);
@@ -74,7 +100,7 @@ class CardController extends Controller
         $cart = Cart::where('customer_id', $unique_id)->firstOrFail();
 
         $items = collect($cart->cart_items)
-            ->reject(fn($i) => $i['food_item_id'] == $validated['food_item_id'])
+            ->reject(fn ($i) => $i['food_item_id'] == $validated['food_item_id'])
             ->values();
 
         $cart->update(['cart_items' => $items]);
@@ -87,7 +113,7 @@ class CardController extends Controller
         try {
             $cart = Cart::where('customer_id', $unique_id)->first();
 
-            if (!$cart) {
+            if (! $cart) {
                 return response()->json([
                     'items' => [],
                     'total' => 0,
@@ -107,6 +133,7 @@ class CardController extends Controller
 
         } catch (Exception $e) {
             Log::error($e->getMessage());
+
             return response()->json(['error' => 'Internal server error'], 500);
         }
     }
@@ -119,8 +146,9 @@ class CardController extends Controller
         $items = collect($cart->cart_items ?? [])->map(function ($item) {
             $food = FoodItem::find($item['food_item_id']);
 
-            if (!$food)
+            if (! $food) {
                 return null;
+            }
 
             return [
                 'id' => $food->id,
@@ -129,6 +157,7 @@ class CardController extends Controller
                 'image' => $food->image,
                 'quantity' => $item['quantity'],
                 'subtotal' => $food->price * $item['quantity'],
+                'instructions' => $item['instructions'],
             ];
         })->filter(); // remove nulls if a food item was deleted
 
@@ -151,7 +180,6 @@ class CardController extends Controller
     //                 'total' => 0,
     //             ], 200);
     //         }
-
 
     //         // hydrate with food details
     //         $items = collect($cart->cart_items ?? [])->map(function ($item) {
@@ -182,7 +210,7 @@ class CardController extends Controller
 
         $order = Order::where('card_id', $cart->id)->first();
 
-        if (!$order) {
+        if (! $order) {
             $items = collect($cart->cart_items ?? [])->map(function ($item) {
                 $food = FoodItem::find($item['food_item_id']);
 
@@ -217,7 +245,7 @@ class CardController extends Controller
             $order = Order::where('customer_id', $unique_id)->first();
 
             return response()->json([
-                'data' => $order
+                'data' => $order,
             ], 200);
 
         } catch (Exception $e) {

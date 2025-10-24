@@ -15,4 +15,13 @@ class FoodItem extends Model
         return $this->belongsTo(FoodCategory::class);
     }
 
+    public function addons()
+    {
+        return $this->hasMany(FoodItemAddon::class, 'food_item_id');
+    }
+
+    public function extras()
+    {
+        return $this->hasMany(FoodItemExtras::class, 'food_item_id');
+    }
 }

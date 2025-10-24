@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\Customer\CardController;
+use App\Http\Controllers\Customer\CartController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;;
 use App\Http\Controllers\Customer\CustomerController;
@@ -13,16 +13,17 @@ Route::prefix('/{unique_id}')->name('customer.')->middleware(['isCustomer'])->gr
     Route::get('/home', [HomeController::class, 'home'])->name( 'home');
     Route::get('/food-items', [HomeController::class, 'foodItems'])->name('food.items');
     Route::get('/food-categories', [HomeController::class, 'foodCategories'])->name('food.categories');
-    Route::post('/add-to-cart', [CardController::class, 'addToCart'])->name('add.to.cart');
-    Route::get('/get-cart', [CardController::class, 'getCart'])->name('get.cart');
+    Route::post('/add-to-cart', [CartController::class, 'addToCart'])->name('add.to.cart');
+    Route::get('/get-cart', [CartController::class, 'getCart'])->name('get.cart');
     Route::get('/cart', function (string $unique_id) {
         return Inertia::render('customer/cart', ['uniqueId' => $unique_id]);
     })->name('cart');
-    
-    Route::post('/remove-from-cart', [CardController::class, 'removeFromCart'])->name('remove.from.cart');
-    Route::post('/update-cart-item-quantity', [CardController::class, 'updateCartQuantity'])->name('update.cart.quantity');
-    Route::get('/checkout', [CardController::class, 'checkout'])->name('checkout');
-    Route::get('/order-status', [CardController::class, 'getOrderStatus']);
+
+    Route::post('/update-cart-item', [CartController::class, 'updateCartItem']);
+    Route::post('/remove-from-cart', [CartController::class, 'removeFromCart'])->name('remove.from.cart');
+    Route::post('/update-cart-item-quantity', [CartController::class, 'updateCartQuantity'])->name('update.cart.quantity');
+    Route::get('/checkout', [CartController::class, 'checkout'])->name('checkout');
+    Route::get('/order-status', [CartController::class, 'getOrderStatus']);
     Route::get('/notification', function (string $unique_id) {
         return Inertia::render('customer/notification', ['uniqueId' => $unique_id]);
     });

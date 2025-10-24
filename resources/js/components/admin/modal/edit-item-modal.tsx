@@ -12,6 +12,8 @@ import { FoodItemValidationErrors } from '@/types/validation';
 import { router } from '@inertiajs/react';
 import { Check, ChevronsUpDown } from 'lucide-react';
 import { useState } from 'react';
+import { ManageExtraModal } from './manage-extra-modal copy';
+import { ManageAddonModal } from './manage-addon-modal';
 
 interface Props {
     onOpen: boolean;
@@ -28,6 +30,10 @@ const EditItemModal = ({ onOpen, onOpenChange, categories, data }: Props) => {
     const [image, setImage] = useState<File | null>(null);
     const [previewImage, setPreviewImage] = useState<string | null>('/storage/' + data.image);
     const [errors, setErrors] = useState<FoodItemValidationErrors>({});
+    const [addons, setAddons] = useState<{ name: string; price: number }[]>(data.addons || []);
+    const [addonModalOpen, setAddonModalOpen] = useState(false);
+    const [extras, setExtras] = useState<{ name: string; price: number }[]>(data.extras || []);
+    const [extraModalOpen, setExtraModalOpen] = useState(false);
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0] || null;
@@ -43,31 +49,41 @@ const EditItemModal = ({ onOpen, onOpenChange, categories, data }: Props) => {
     const handleFormSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
-        const result = foodItemSchema.safeParse({ name, price, category_id: categoryId, image: image || undefined });
+        const result = foodItemSchema.safeParse({
+            name,
+            price,
+            category_id: categoryId,
+            image: image || undefined,
+            addons,
+            extras,
+        });
 
         if (!result.success) {
-            // map Zod errors
-            const fieldErrors: { name?: string; image?: string } = {};
+            const fieldErrors: Record<string, string> = {};
             result.error.issues.forEach((err) => {
-                const field = err.path[0] as 'name' | 'image';
+                const field = err.path[0] as string;
                 fieldErrors[field] = err.message;
             });
             setErrors(fieldErrors);
             return;
         }
 
-        // clear errors if validation passes
         setErrors({});
 
         const formData = new FormData();
         formData.append('name', name);
         formData.append('price', price);
         formData.append('category_id', categoryId);
+
         if (image) {
             formData.append('image', image);
         }
 
-        formData.append('_method', 'PUT'); // For Laravel to recognize it as a PUT request
+        // ✅ Append addons + extras as JSON
+        formData.append('addons', JSON.stringify(addons));
+        formData.append('extras', JSON.stringify(extras));
+
+        formData.append('_method', 'PUT');
 
         router.post(item.update.url(data.id), formData, {
             forceFormData: true,
@@ -77,6 +93,8 @@ const EditItemModal = ({ onOpen, onOpenChange, categories, data }: Props) => {
                 setCategoryId('');
                 setImage(null);
                 setPreviewImage(null);
+                setAddons([]);
+                setExtras([]);
                 onOpenChange(false);
             },
         });
@@ -120,6 +138,50 @@ const EditItemModal = ({ onOpen, onOpenChange, categories, data }: Props) => {
                                 required
                             />
                             {errors.price && <p className="text-sm text-red-500">{errors.price}</p>}
+                        </div>
+
+                        <div className="grid gap-3">
+                            <Label>Add-ons</Label>
+
+                            {/* Selected Addons UI */}
+                            {addons.length > 0 ? (
+                                <div className="flex flex-wrap gap-2">
+                                    {addons.map((a, index) => (
+                                        <div key={index} className="flex items-center gap-2 rounded-md border px-2 py-1">
+                                            <span className="text-sm font-medium">{a.name}</span>
+                                            <span className="text-xs opacity-70">(${a.price})</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <p className="text-sm text-muted-foreground">No add-ons selected yet.</p>
+                            )}
+
+                            <Button type="button" onClick={() => setAddonModalOpen(true)} className="w-full cursor-pointer">
+                                Manage Add-ons
+                            </Button>
+                        </div>
+
+                        {/* ✅ EXTRAS Section */}
+                        <div className="grid gap-3">
+                            <Label>Extras (Optional)</Label>
+
+                            {extras.length > 0 ? (
+                                <div className="flex flex-wrap gap-2">
+                                    {extras.map((ex, index) => (
+                                        <div key={index} className="flex items-center gap-2 rounded-md border px-2 py-1">
+                                            <span className="text-sm font-medium">{ex.name}</span>
+                                            <span className="text-xs opacity-70">(${ex.price})</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <p className="text-sm text-muted-foreground">No extras added yet.</p>
+                            )}
+
+                            <Button type="button" onClick={() => setExtraModalOpen(true)} className="w-full cursor-pointer">
+                                Manage Extras
+                            </Button>
                         </div>
 
                         <div className="grid gap-3">
@@ -176,10 +238,14 @@ const EditItemModal = ({ onOpen, onOpenChange, categories, data }: Props) => {
                                 Cancel
                             </Button>
                         </DialogClose>
-                        <Button className='cursor-pointer' type="submit">Save changes</Button>
+                        <Button className="cursor-pointer" type="submit">
+                            Save changes
+                        </Button>
                     </DialogFooter>
                 </form>
             </DialogContent>
+            {extraModalOpen && <ManageExtraModal open={extraModalOpen} onOpenChange={setExtraModalOpen} extras={extras} setExtras={setExtras} />}
+            {addonModalOpen && <ManageAddonModal open={addonModalOpen} onOpenChange={setAddonModalOpen} addons={addons} setAddons={setAddons} />}
         </Dialog>
     );
 };
