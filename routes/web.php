@@ -10,12 +10,8 @@ Route::get('/clear-cache', function () {
     Artisan::call('config:clear');
     Artisan::call('route:clear');
     Artisan::call('view:clear');
-
-
     return redirect(route('home'));
 })->name('clear.cache');
-
-
 
 Route::get('/storage-link', function () {
     Artisan::call('storage:link');

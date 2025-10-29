@@ -29,7 +29,7 @@ export function CustomerSideBar({ uniqueId }: { uniqueId: string }) {
     return (
         <Sidebar collapsible="icon" variant="inset">
             <SidebarHeader>
-                <Link href="#" className="flex items-center gap-2">
+                <Link href="/" className="flex items-center gap-2">
                     <AppLogo />
                 </Link>
             </SidebarHeader>

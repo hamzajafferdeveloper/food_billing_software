@@ -235,12 +235,20 @@ class CartController extends Controller
                 $cart->update(['status' => 'completed']);
                 Cache::forget("cart_{$unique_id}");
 
+                $waiter_id = null;
+
+                $waiter = auth()->user();
+                if($waiter && $waiter->hasRole('waiter') ){
+                    $waiter_id = $waiter->id;
+                }
+
                 // ✅ Create new order
                 $order = Order::create([
                     'customer_id' => $cart->customer_id,
                     'card_id' => $cart->id,
                     'total_amount' => $items->sum('subtotal'),
                     'payment_status' => 'pending',
+                    'waiter_id' => $waiter_id,
                 ]);
 
                 // ✅ Clear Laravel cache after checkout
