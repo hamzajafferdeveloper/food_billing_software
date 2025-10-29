@@ -1,13 +1,14 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\FoodCategoryController;
 use App\Http\Controllers\Admin\FoodItemController;
-use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\TableController;
+use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\WaiterController;
+use Illuminate\Support\Facades\Route;
 
-Route::prefix('admin/')->middleware(['auth', 'verified', 'isAdmin'])->name('admin.')->group(function() {
+Route::prefix('admin/')->middleware(['auth', 'verified', 'isAdmin'])->name('admin.')->group(function () {
     Route::get('dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
 
     // Food Category Routes
@@ -26,6 +27,14 @@ Route::prefix('admin/')->middleware(['auth', 'verified', 'isAdmin'])->name('admi
         Route::delete('delete/{id}', [FoodItemController::class, 'destroy'])->name('destroy');
     });
 
+    Route::prefix('waiter/')->name('waiter.')->group(function () {
+        Route::get('all', [WaiterController::class, 'index'])->name('index');
+        Route::get('{id}', [WaiterController::class, 'show'])->name('single');
+        Route::post('store', [WaiterController::class, 'store'])->name('store');
+        Route::put('update/{id}', [WaiterController::class, 'update'])->name('update');
+        Route::delete('delete/{id}', [WaiterController::class, 'destroy'])->name('destroy');
+    });
+
     // User Routes
     Route::prefix('user/')->name('user.')->group(function () {
         Route::get('all', [UserController::class, 'index'])->name('index');
@@ -34,6 +43,7 @@ Route::prefix('admin/')->middleware(['auth', 'verified', 'isAdmin'])->name('admi
         Route::put('update/{id}', [UserController::class, 'update'])->name('update');
         Route::delete('delete/{id}', [UserController::class, 'destroy'])->name('destroy');
     });
+
 
     // Tables Routes
     Route::prefix('tables/')->name('table.')->group(function () {
