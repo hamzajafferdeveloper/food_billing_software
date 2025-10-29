@@ -26,4 +26,7 @@ class Order extends Model
     public function payment(){
         return $this->hasOne(Payment::class,'order_id', 'id');
     }
+    public function waiter(){
+        return $this->belongsTo(User::class, 'waiter_id', 'id');
+    }
 }

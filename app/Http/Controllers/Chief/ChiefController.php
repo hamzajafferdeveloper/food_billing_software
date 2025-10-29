@@ -20,7 +20,7 @@ class ChiefController extends Controller
     public function getNewOrder(Request $request)
     {
         try {
-            $orders = Order::with('cart', 'customer', 'payment')->where('status', 'pending')->orderBy('id', 'desc')->get();
+            $orders = Order::with('cart', 'customer', 'payment', 'waiter')->where('status', 'pending')->orderBy('id', 'desc')->get();
 
             return response()->json(['data' => $orders], 200);
         } catch (Exception $e) {

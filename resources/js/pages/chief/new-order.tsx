@@ -52,6 +52,10 @@ interface Order {
         sender_number: string;
         transaction_id: string;
     };
+    waiter?: {
+        id: number;
+        name: string;
+    }
 }
 
 export default function NewOrder() {
@@ -190,9 +194,16 @@ export default function NewOrder() {
                                 <p className="flex justify-between text-gray-500 dark:text-white">
                                     <span className="font-semibold">Transaction ID:</span> {order.payment?.transaction_id ?? '—'}
                                 </p>
-                                <p className="flex justify-between text-gray-500 dark:text-white">
-                                    <span className="font-semibold">Waiter ID:</span> {order.waiter_id ?? '—'}
-                                </p>
+                                {order.waiter_id ? (
+                                    <p className="flex justify-between text-gray-500 dark:text-white">
+                                        <span className="font-semibold">Waiter ID:</span> { order.waiter?.name ?? '—' } #{ order.waiter?.id }
+                                    </p>
+
+                                ): (
+                                    <p className="flex justify-between text-gray-500 dark:text-white">
+                                        <span className="font-semibold">Order Placed By Customer</span>
+                                    </p>
+                                )}
 
                                 <button
                                     onClick={() => viewOrderDetails(order.id)}
