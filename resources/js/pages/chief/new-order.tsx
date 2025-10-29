@@ -18,6 +18,7 @@ interface Order {
     total_amount: string;
     payment_status: string;
     created_at: string;
+    waiter_id?: number;
     customer?: {
         unique_id: string;
         table_id: number;
@@ -184,10 +185,13 @@ export default function NewOrder() {
                                     <span className="font-semibold">Amount:</span> {order.total_amount}
                                 </p>
                                 <p className="mb-2 flex justify-between text-gray-500 dark:text-white">
-                                    <span className="font-semibold">Sender:</span> {order.payment?.sender_number}
+                                    <span className="font-semibold">Sender:</span> {order.payment?.sender_number ?? '—'}
                                 </p>
                                 <p className="flex justify-between text-gray-500 dark:text-white">
-                                    <span className="font-semibold">Transaction ID:</span> {order.payment?.transaction_id}
+                                    <span className="font-semibold">Transaction ID:</span> {order.payment?.transaction_id ?? '—'}
+                                </p>
+                                <p className="flex justify-between text-gray-500 dark:text-white">
+                                    <span className="font-semibold">Waiter ID:</span> {order.waiter_id ?? '—'}
                                 </p>
 
                                 <button
