@@ -10,6 +10,8 @@ use Illuminate\Support\Facades\Route;
 
 Route::prefix('admin/')->middleware(['auth', 'verified', 'isAdmin'])->name('admin.')->group(function () {
     Route::get('dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
+    Route::get('reports/sale', [AdminController::class, 'SaleReports'])->name('reports.sale');
+    Route::get('reports/items', [AdminController::class, 'itemReports'])->name('reports.items');
 
     // Food Category Routes
     Route::prefix('food-category/')->name('food.category.')->group(function () {

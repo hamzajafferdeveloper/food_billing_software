@@ -11,6 +11,7 @@ import item from '@/routes/admin/food/item';
 import user from '@/routes/admin/user';
 import table from '@/routes/admin/table';
 import waiter from '@/routes/admin/waiter';
+import { items, sale } from '@/routes/admin/reports';
 
 const mainNavItems: NavItem[] = [
     {
@@ -42,6 +43,22 @@ const mainNavItems: NavItem[] = [
         title: 'Waiter',
         href: waiter.index().url,
         icon: UserRound
+    },
+    {
+        title: 'Reports',
+        href: '/',
+        icon: LayoutGrid,
+        subMenu: [
+            {
+                title: 'Sales Report',
+                href: sale().url,
+            },
+            {
+                title: 'Item Report',
+                href: items().url,
+            }
+
+        ]
     }
 ];
 

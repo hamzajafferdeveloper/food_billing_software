@@ -139,7 +139,7 @@ export default function FoodCard({ image, title, price, id, addons, extras }: Pr
                             {/* Quantity Controls */}
                             <div className="flex items-center gap-3">
                                 <p className="text-sm font-semibold text-gray-600">Quantity</p>
-                                <div className="flex items-center gap-3 rounded-md bg-gray-400/20 p-1">
+                                <div className="flex items-center gap-3 rounded-md bg-gray-400/20 text-black p-1">
                                     <button
                                         onClick={decreaseQty}
                                         className="flex h-6 w-6 cursor-pointer items-center justify-center rounded-full border border-[#e0b24f] hover:bg-[#e0b24f]/30"
@@ -254,7 +254,7 @@ export default function FoodCard({ image, title, price, id, addons, extras }: Pr
 
                             {/* Instructions */}
                             <Textarea
-                                className="w-full"
+                                className="w-full text-black"
                                 placeholder="Special Instructions (Optional)"
                                 value={instructions}
                                 onChange={(e) => setInstructions(e.target.value)}

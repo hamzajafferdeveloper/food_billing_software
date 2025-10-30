@@ -140,6 +140,9 @@
     }
 }
 
+/* 👇 Needed for ShadCN components */
+@import "react-day-picker/dist/style.css";
+
 
 .btn-primary{
     background-color: #fce0a2 !important;
