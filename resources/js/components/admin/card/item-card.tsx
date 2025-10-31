@@ -8,7 +8,7 @@ import item from '@/routes/admin/food/item';
 import { Badge } from "@/components/ui/badge"
 import EditItemModal from '../modal/edit-item-modal';
 
-const ItemCard = ({ data, categories }: { data: FoodItem, categories: FoodCategory[] }) => {
+const ItemCard = ({ data, categories, currency }: { data: FoodItem, categories: FoodCategory[], currency: string }) => {
     const [editModalOpen, setEditModalOpen] = useState<boolean>(false);
     const [deleteModalOpen, setDeleteModalOpen] = useState<boolean>(false);
 
@@ -39,10 +39,10 @@ const ItemCard = ({ data, categories }: { data: FoodItem, categories: FoodCatego
 
                 <CardFooter className='flex justify-between p-4'>
                     <p className="w-full text-lg font-semibold">{data.name}</p>
-                    <Badge className="mt-2" variant="outline">$ {number_format(data.price)}</Badge>
+                    <Badge className="mt-2" variant="outline">{currency} {number_format(data.price)}</Badge>
                 </CardFooter>
             </Card>
-            <EditItemModal onOpen={editModalOpen} onOpenChange={setEditModalOpen} categories={categories} data={data} />
+            <EditItemModal onOpen={editModalOpen} onOpenChange={setEditModalOpen} categories={categories} data={data} currency={currency} />
             <ConfirmDialog
                 onOpen={deleteModalOpen}
                 onOpenChange={setDeleteModalOpen}

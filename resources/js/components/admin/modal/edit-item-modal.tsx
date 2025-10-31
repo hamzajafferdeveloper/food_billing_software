@@ -20,9 +20,10 @@ interface Props {
     onOpenChange: (open: boolean) => void;
     categories: FoodCategory[];
     data: FoodItem;
+    currency: string;
 }
 
-const EditItemModal = ({ onOpen, onOpenChange, categories, data }: Props) => {
+const EditItemModal = ({ onOpen, onOpenChange, categories, data, currency }: Props) => {
     const [name, setName] = useState(data.name);
     const [price, setPrice] = useState(data.price.toString());
     const [categoryId, setCategoryId] = useState<string>(data.category_id.toString());
@@ -149,7 +150,7 @@ const EditItemModal = ({ onOpen, onOpenChange, categories, data }: Props) => {
                                     {addons.map((a, index) => (
                                         <div key={index} className="flex items-center gap-2 rounded-md border px-2 py-1">
                                             <span className="text-sm font-medium">{a.name}</span>
-                                            <span className="text-xs opacity-70">(${a.price})</span>
+                                            <span className="text-xs opacity-70">({currency}{a.price})</span>
                                         </div>
                                     ))}
                                 </div>
@@ -171,7 +172,7 @@ const EditItemModal = ({ onOpen, onOpenChange, categories, data }: Props) => {
                                     {extras.map((ex, index) => (
                                         <div key={index} className="flex items-center gap-2 rounded-md border px-2 py-1">
                                             <span className="text-sm font-medium">{ex.name}</span>
-                                            <span className="text-xs opacity-70">(${ex.price})</span>
+                                            <span className="text-xs opacity-70">({currency}{ex.price})</span>
                                         </div>
                                     ))}
                                 </div>

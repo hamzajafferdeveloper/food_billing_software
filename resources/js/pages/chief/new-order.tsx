@@ -1,7 +1,7 @@
 import ChiefSidebarLayout from '@/layouts/chief/chief-layout';
 import { newOrder } from '@/routes/chief';
-import { type BreadcrumbItem } from '@/types';
-import { Head, router } from '@inertiajs/react';
+import { SharedData, type BreadcrumbItem } from '@/types';
+import { Head, router, usePage } from '@inertiajs/react';
 import { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 
@@ -65,6 +65,9 @@ export default function NewOrder() {
     const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
     const [confirmModal, setConfirmModal] = useState<{ open: boolean; id: number | null }>({ open: false, id: null }); // 👈 custom confirm dialog state
     const modalRef = useRef<HTMLDivElement | null>(null);
+        const page = usePage<SharedData>();
+        const { currency } = page.props;
+
 
     const fetchOrders = () => {
         fetch('/chief/get-new-order')
@@ -186,7 +189,7 @@ export default function NewOrder() {
                                     <span className="font-semibold">Date:</span> {order.created_at}
                                 </p>
                                 <p className="mb-2 flex justify-between text-gray-500 dark:text-white">
-                                    <span className="font-semibold">Amount:</span> {order.total_amount}
+                                    <span className="font-semibold">Amount:</span> {currency}{order.total_amount}
                                 </p>
                                 <p className="mb-2 flex justify-between text-gray-500 dark:text-white">
                                     <span className="font-semibold">Sender:</span> {order.payment?.sender_number ?? '—'}
@@ -251,7 +254,7 @@ export default function NewOrder() {
                                 <strong className="font-medium">Table:</strong> #{selectedOrder.customer?.table_id ?? '—'}
                             </p>
                             <p>
-                                <strong className="font-medium">Total:</strong> {selectedOrder.total_amount}
+                                <strong className="font-medium">Total:</strong> {currency}{selectedOrder.total_amount}
                             </p>
                             <p>
                                 <strong className="font-medium">Sender:</strong> {selectedOrder.payment?.sender_number}
@@ -287,7 +290,7 @@ export default function NewOrder() {
                                                 <div>
                                                     <h4 className="text-lg font-semibold text-gray-800 dark:text-white">{item.food_item?.name}</h4>
                                                     <p className="text-sm text-gray-500 dark:text-gray-400">
-                                                        Base Price: Rs. {item.food_item?.price}
+                                                        Base Price: {currency} {item.food_item?.price}
                                                     </p>
                                                 </div>
                                             </div>
@@ -311,7 +314,7 @@ export default function NewOrder() {
                                                             className="flex justify-between rounded-lg bg-gray-100 px-3 py-2 text-sm dark:bg-gray-700"
                                                         >
                                                             <span className="text-gray-800 dark:text-gray-200">➕ {addon.name}</span>
-                                                            <span className="font-semibold text-gray-900 dark:text-white">Rs. {addon.price}</span>
+                                                            <span className="font-semibold text-gray-900 dark:text-white">{currency}{addon.price}</span>
                                                         </div>
                                                     ))}
                                                 </div>
@@ -337,7 +340,7 @@ export default function NewOrder() {
                                                                 ⚡ {extra.name} × {extra.quantity}
                                                             </span>
                                                             <span className="font-semibold text-gray-900 dark:text-white">
-                                                                Rs. {Number(extra.price) * Number(extra.quantity)}
+                                                                {currency} {Number(extra.price) * Number(extra.quantity)}
                                                             </span>
                                                         </div>
                                                     ))}
@@ -349,7 +352,7 @@ export default function NewOrder() {
 
                                         {/* ✅ Subtotal */}
                                         <div className="mt-5 flex justify-end border-t pt-3 dark:border-gray-700">
-                                            <span className="text-md font-bold text-gray-900 dark:text-white">Subtotal: Rs. ${calculatedSubtotal}</span>
+                                            <span className="text-md font-bold text-gray-900 dark:text-white">Subtotal: {currency}{calculatedSubtotal}</span>
                                         </div>
                                     </div>
                                 );

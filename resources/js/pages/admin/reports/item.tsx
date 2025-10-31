@@ -8,8 +8,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import AdminSidebarLayout from '@/layouts/admin/admin-layout';
 import { cn } from '@/lib/utils';
 import { items, sale } from '@/routes/admin/reports';
-import { BreadcrumbItem } from '@/types';
-import { Head, router } from '@inertiajs/react';
+import { BreadcrumbItem, SharedData } from '@/types';
+import { Head, router, usePage } from '@inertiajs/react';
 import { format } from 'date-fns';
 import { CalendarIcon, ChevronLeft, ChevronRight, ChevronUp } from 'lucide-react';
 import { useEffect, useState } from 'react';
@@ -44,7 +44,8 @@ export default function ItemReports({
     const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
     const [page, setPage] = useState<number>(currentPage);
     const [pageSize, setPageSize] = useState<number>(initialPageSize);
-
+    const pageData = usePage<SharedData>();
+    const { currency } = pageData.props;
     // fetch from server
     function fetchData() {
         router.get(
@@ -129,7 +130,7 @@ export default function ItemReports({
                                         <CalendarIcon className="mr-2 h-4 w-4" />
                                         {salesDate?.from ? (
                                             salesDate.to ? (
-                                                `${format(salesDate.from, 'MMM d')} - ${format(salesDate.to, 'MMM d, yyyy')}`
+                                                `{currency}{format(salesDate.from, 'MMM d')} - {currency}{format(salesDate.to, 'MMM d, yyyy')}`
                                             ) : (
                                                 format(salesDate.from, 'MMM d, yyyy')
                                             )

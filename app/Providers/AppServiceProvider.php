@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use Cache;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -19,6 +20,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        $this->app->singleton('siteSettings', function () {
+            return Cache::rememberForever('site_settings', function () {
+                return \App\Models\Setting::pluck('value', 'key')->toArray();
+            });
+        });
     }
 }

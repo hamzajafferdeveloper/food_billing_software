@@ -1,9 +1,9 @@
 import DashboardItemCard from '@/components/admin/card/dashboard-item-card';
 import AdminSidebarLayout from '@/layouts/admin/admin-layout';
 import { dashboard } from '@/routes/admin';
-import { type BreadcrumbItem } from '@/types';
+import { SharedData, type BreadcrumbItem } from '@/types';
 import { FoodItemPagination } from '@/types/pagination';
-import { Head } from '@inertiajs/react';
+import { Head, usePage } from '@inertiajs/react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -13,6 +13,8 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 export default function Dashboard({ ItemsPagination }: { ItemsPagination: FoodItemPagination }) {
+    const page = usePage<SharedData>();
+    const { currency } = page.props;
     return (
         <AdminSidebarLayout breadcrumbs={breadcrumbs}>
             <Head title="Dashboard" />
@@ -24,7 +26,7 @@ export default function Dashboard({ ItemsPagination }: { ItemsPagination: FoodIt
                     ) : (
                         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
                             {ItemsPagination.data.map((item) => (
-                                <DashboardItemCard key={item.id} data={item} />
+                                <DashboardItemCard key={item.id} data={item} currency={currency} />
                             ))}
                         </div>
                     )}

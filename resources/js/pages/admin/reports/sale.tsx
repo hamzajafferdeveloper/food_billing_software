@@ -7,7 +7,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import AdminSidebarLayout from '@/layouts/admin/admin-layout';
 import { cn } from '@/lib/utils';
 import { sale } from '@/routes/admin/reports';
-import { Head, router } from '@inertiajs/react';
+import { SharedData } from '@/types';
+import { Head, router, usePage } from '@inertiajs/react';
 import { format } from 'date-fns';
 import { CalendarIcon, ChevronDown, ChevronLeft, ChevronRight, ChevronUp } from 'lucide-react';
 import { useEffect, useState } from 'react';
@@ -24,6 +25,8 @@ export default function SaleReports({ salesData, filters, allWaiters }: { salesD
     );
     const [perPage, setPerPage] = useState(filters.perPage || 10);
 
+    const pageData = usePage<SharedData>();
+    const { currency } = pageData.props;
     // ✅ Reusable handler to refetch with updated params
     const handleFilterChange = (extra = {}) => {
         router.get(
@@ -195,7 +198,9 @@ export default function SaleReports({ salesData, filters, allWaiters }: { salesD
                                         // @ts-ignore
                                         salesData.data.map((item, i) => (
                                             <tr key={i} className="border-b hover:bg-muted/40">
-                                                <td className="p-2">$ {Number(item.sales).toLocaleString()}</td>
+                                                <td className="p-2">
+                                                    {currency} {Number(item.sales).toLocaleString()}
+                                                </td>
                                                 <td className="p-2">{item.waiter}</td>
                                                 <td className="p-2 text-right font-medium">
                                                     <span>{item.date ? format(new Date(item.date), 'dd-MM-yyyy') : '-'}</span>

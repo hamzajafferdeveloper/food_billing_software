@@ -1,7 +1,7 @@
 import ChiefSidebarLayout from '@/layouts/chief/chief-layout';
 import { newOrder } from '@/routes/chief';
-import { type BreadcrumbItem } from '@/types';
-import { Head } from '@inertiajs/react';
+import { SharedData, type BreadcrumbItem } from '@/types';
+import { Head, usePage } from '@inertiajs/react';
 import { useEffect, useRef, useState } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [{ title: 'New Orders', href: newOrder().url }];
@@ -59,7 +59,8 @@ export default function Dashboard() {
     const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
     const [confirmModal, setConfirmModal] = useState<{ open: boolean; id: number | null }>({ open: false, id: null }); // 👈 custom confirm dialog state
     const modalRef = useRef<HTMLDivElement | null>(null);
-
+    const page = usePage<SharedData>();
+    const { currency } = page.props;
     const fetchOrders = () => {
         fetch('/chief/get-served-order')
             .then((res) => {
@@ -145,7 +146,7 @@ export default function Dashboard() {
                                             <span className="font-semibold">Date:</span> {order.created_at}
                                         </p>
                                         <p className="mb-2 flex justify-between text-gray-500 dark:text-white">
-                                            <span className="font-semibold">Amount:</span> {order.total_amount}
+                                            <span className="font-semibold">Amount:</span> {currency}{order.total_amount}
                                         </p>
                                         <p className="mb-2 flex justify-between text-gray-500 dark:text-white">
                                             <span className="font-semibold">Sender:</span> {order.payment?.sender_number}
@@ -198,7 +199,7 @@ export default function Dashboard() {
                                 <span className="font-semibold">Table:</span> #{selectedOrder.customer?.table_id ?? '—'}
                             </p>
                             <p className="text-gray-600 dark:text-gray-300">
-                                <span className="font-semibold">Total Amount:</span> {selectedOrder.total_amount}
+                                <span className="font-semibold">Total Amount:</span> {currency}{selectedOrder.total_amount}
                             </p>
 
                             {/* Cart Items */}
@@ -229,7 +230,7 @@ export default function Dashboard() {
                                                             {item.food_item?.name}
                                                         </h4>
                                                         <p className="text-sm text-gray-500 dark:text-gray-400">
-                                                            Base Price: Rs. {item.food_item?.price}
+                                                            Base Price: {currency}{item.food_item?.price}
                                                         </p>
                                                     </div>
                                                 </div>
@@ -253,7 +254,7 @@ export default function Dashboard() {
                                                                 className="flex justify-between rounded-lg bg-gray-100 px-3 py-2 text-sm dark:bg-gray-700"
                                                             >
                                                                 <span className="text-gray-800 dark:text-gray-200">➕ {addon.name}</span>
-                                                                <span className="font-semibold text-gray-900 dark:text-white">Rs. {addon.price}</span>
+                                                                <span className="font-semibold text-gray-900 dark:text-white">{currency} {addon.price}</span>
                                                             </div>
                                                         ))}
                                                     </div>
@@ -279,7 +280,7 @@ export default function Dashboard() {
                                                                     ⚡ {extra.name} × {extra.quantity}
                                                                 </span>
                                                                 <span className="font-semibold text-gray-900 dark:text-white">
-                                                                    Rs. {Number(extra.price) * Number(extra.quantity)}
+                                                                    {currency} {Number(extra.price) * Number(extra.quantity)}
                                                                 </span>
                                                             </div>
                                                         ))}
@@ -292,7 +293,7 @@ export default function Dashboard() {
                                             {/* ✅ Subtotal */}
                                             <div className="mt-5 flex justify-end border-t pt-3 dark:border-gray-700">
                                                 <span className="text-md font-bold text-gray-900 dark:text-white">
-                                                    Subtotal: Rs. ${calculatedSubtotal}
+                                                    Subtotal: {currency}{calculatedSubtotal}
                                                 </span>
                                             </div>
                                         </div>

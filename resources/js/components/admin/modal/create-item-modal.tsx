@@ -19,9 +19,10 @@ interface Props {
     onOpen: boolean;
     onOpenChange: (open: boolean) => void;
     categories: FoodCategory[];
+    currency: string;
 }
 
-const CreateItemModal = ({ onOpen, onOpenChange, categories }: Props) => {
+const CreateItemModal = ({ onOpen, onOpenChange, categories, currency }: Props) => {
     const [name, setName] = useState<string>('');
     const [price, setPrice] = useState<string>('');
     const [categoryId, setCategoryId] = useState<string>('');
@@ -146,7 +147,7 @@ const CreateItemModal = ({ onOpen, onOpenChange, categories }: Props) => {
                                     {addons.map((a, index) => (
                                         <div key={index} className="flex items-center gap-2 rounded-md border px-2 py-1">
                                             <span className="text-sm font-medium">{a.name}</span>
-                                            <span className="text-xs opacity-70">(${a.price})</span>
+                                            <span className="text-xs opacity-70">({currency}{a.price})</span>
                                         </div>
                                     ))}
                                 </div>
@@ -168,7 +169,7 @@ const CreateItemModal = ({ onOpen, onOpenChange, categories }: Props) => {
                                     {extras.map((ex, index) => (
                                         <div key={index} className="flex items-center gap-2 rounded-md border px-2 py-1">
                                             <span className="text-sm font-medium">{ex.name}</span>
-                                            <span className="text-xs opacity-70">(${ex.price})</span>
+                                            <span className="text-xs opacity-70">({currency}{ex.price})</span>
                                         </div>
                                     ))}
                                 </div>

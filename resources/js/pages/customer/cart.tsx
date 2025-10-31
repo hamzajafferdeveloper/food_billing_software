@@ -3,7 +3,8 @@ import CustomerSideBarLayout from '@/layouts/customer/customer-layout';
 import { storeUniqueId } from '@/lib/utils';
 import { RootState } from '@/store';
 import { clearCart, setCart } from '@/store/cartSlice';
-import { Head, router } from '@inertiajs/react';
+import { SharedData } from '@/types';
+import { Head, router, usePage } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'sonner';
@@ -12,6 +13,8 @@ export default function Cart({ uniqueId }: { uniqueId: string }) {
     const reduxCartItems = useSelector((state: RootState) => state.cart.items);
     const dispatch = useDispatch();
     const [cartItems, setCartItems] = useState(reduxCartItems);
+    const page = usePage<SharedData>();
+    const { currency } = page.props;
 
     useEffect(() => {
         storeUniqueId(uniqueId);
@@ -150,7 +153,7 @@ export default function Cart({ uniqueId }: { uniqueId: string }) {
                                         </div>
 
                                         {/* Price */}
-                                        <div className="col-span-2 text-center text-gray-700">${item.price}</div>
+                                        <div className="col-span-2 text-center text-gray-700">{currency}{item.price}</div>
 
                                         {/* Quantity */}
                                         <div className="col-span-3 flex items-center justify-center space-x-3">
@@ -170,7 +173,7 @@ export default function Cart({ uniqueId }: { uniqueId: string }) {
                                         </div>
 
                                         {/* ✅ Updated Subtotal (includes addons + extras) */}
-                                        <div className="col-span-1 text-right font-semibold text-gray-900">${calculatedSubtotal.toFixed(2)}</div>
+                                        <div className="col-span-1 text-right font-semibold text-gray-900">{}{calculatedSubtotal.toFixed(2)}</div>
 
                                         {/* Remove */}
                                         <div className="col-span-1 text-right">
@@ -195,7 +198,7 @@ export default function Cart({ uniqueId }: { uniqueId: string }) {
                                                             key={index}
                                                             className="rounded-md border border-yellow-300 bg-yellow-100 px-2 py-1 text-xs text-yellow-800"
                                                         >
-                                                            {addon.name} (+${addon.price})
+                                                            {addon.name} (+{currency}{addon.price})
                                                         </span>
                                                     ))}
                                                 </div>
@@ -213,7 +216,7 @@ export default function Cart({ uniqueId }: { uniqueId: string }) {
                                                                 {extra.name} × {extra.quantity}
                                                             </span>
                                                             <span className="font-semibold text-gray-800">
-                                                                +${(extra.price * extra.quantity).toFixed(2)}
+                                                                +{currency}{(extra.price * extra.quantity).toFixed(2)}
                                                             </span>
                                                         </li>
                                                     ))}
@@ -230,7 +233,7 @@ export default function Cart({ uniqueId }: { uniqueId: string }) {
                     <div className="flex items-center justify-between border-t bg-gray-400/30 px-6 py-4">
                         <span className="text-lg font-semibold">Total</span>
                         <span className="text-xl font-bold text-green-600">
-                            ${cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0).toFixed(2)}
+                            {currency}{cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0).toFixed(2)}
                         </span>
                     </div>
 

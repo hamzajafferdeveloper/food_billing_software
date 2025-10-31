@@ -2,7 +2,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { getStoredUniqueId } from '@/lib/utils';
 import { RootState } from '@/store';
 import { addToCart } from '@/store/cartSlice';
-import { router } from '@inertiajs/react';
+import { SharedData } from '@/types';
+import { router, usePage } from '@inertiajs/react';
 import { Minus, Plus, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -31,6 +32,9 @@ export default function FoodCard({ image, title, price, id, addons, extras }: Pr
     const [selectedAddons, setSelectedAddons] = useState<{ item_id: number; name: string; price: number }[]>([]);
     const [selectedExtras, setSelectedExtras] = useState<{ item_id: number; quantity: number; name: string; price: number }[]>([]);
     const [totalPrice, setTotalPrice] = useState(price);
+
+    const page = usePage<SharedData>();
+    const { currency } = page.props;
 
     const increaseQty = () => setQuantity((prev) => prev + 1);
     const decreaseQty = () => setQuantity((prev) => (prev > 1 ? prev - 1 : 1));
@@ -105,7 +109,7 @@ export default function FoodCard({ image, title, price, id, addons, extras }: Pr
             <div className="flex w-full flex-col items-center rounded-xl border border-gray-200 bg-white p-4 text-center shadow-sm sm:w-64">
                 <img src={`/storage/${image}`} alt={title} className="mb-3 h-24 w-24 rounded-full object-cover" />
                 <h3 className="text-lg font-bold text-gray-800">{title}</h3>
-                <p className="mb-4 text-sm text-gray-500">${price}</p>
+                <p className="mb-4 text-sm text-gray-500">{currency}{price}</p>
 
                 <button
                     onClick={handleOpenModal}
@@ -132,7 +136,7 @@ export default function FoodCard({ image, title, price, id, addons, extras }: Pr
                                 <img src={`/storage/${image}`} alt={title} className="h-20 w-20 rounded-lg border object-cover" />
                                 <div>
                                     <h2 className="text-lg font-bold text-gray-800">{title}</h2>
-                                    <p className="text-sm font-medium text-green-600">${price}</p>
+                                    <p className="text-sm font-medium text-green-600">{currency}{price}</p>
                                 </div>
                             </div>
 
@@ -230,7 +234,7 @@ export default function FoodCard({ image, title, price, id, addons, extras }: Pr
                                                 >
                                                     <div className="flex flex-col">
                                                         <span className="truncate text-sm font-semibold text-gray-800">{extra.name}</span>
-                                                        <span className="text-sm text-gray-600">${extra.price}</span>
+                                                        <span className="text-sm text-gray-600">{currency}{extra.price}</span>
                                                     </div>
 
                                                     {/* Quantity Controls */}
@@ -262,7 +266,7 @@ export default function FoodCard({ image, title, price, id, addons, extras }: Pr
                             {/* Buttons */}
                             <div className="flex w-full justify-end gap-2">
                                 <button onClick={handleAddToCart} className="btn-primary w-full cursor-pointer !rounded-3xl px-4 py-2 text-white">
-                                    {isAdded ? 'Update Item' : 'Add to Cart'} - ${totalPrice}
+                                    {isAdded ? 'Update Item' : 'Add to Cart'} - {currency}{totalPrice}
                                 </button>
                             </div>
                         </div>
