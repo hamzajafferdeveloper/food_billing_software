@@ -59,7 +59,7 @@ export const AllItemSection = ({
                     <Button
                         onClick={loadMore}
                         disabled={loading}
-                        className="rounded-full bg-primary px-6 py-2 text-white"
+                        className="btn btn-primary"
                     >
                         {loading ? 'Loading...' : 'Load More'}
                     </Button>

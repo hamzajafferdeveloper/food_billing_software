@@ -6,6 +6,7 @@ import { CustomerSidebarHeader } from '@/components/customer/customer-sidebar-he
 import CustomerSideBarLayout from '@/layouts/customer/customer-layout';
 import { storeUniqueId } from '@/lib/utils';
 import { FoodCategory } from '@/types/data';
+import { Button } from '@/components/ui/button';
 
 interface PaginatedCategory {
     data: FoodCategory[];
@@ -58,12 +59,12 @@ export default function AllFoodCategories({ uniqueId, foodCategories }: { unique
 
             {nextPage && (
                 <div className="flex justify-center mt-6">
-                    <button
+                    <Button
                         onClick={loadMore}
-                        className="px-4 py-2 rounded-lg bg-primary text-white hover:bg-primary/80"
+                        className="btn btn-primary"
                     >
                         Load More
-                    </button>
+                    </Button>
                 </div>
             )}
         </CustomerSideBarLayout>
