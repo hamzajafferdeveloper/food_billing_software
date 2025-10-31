@@ -5,7 +5,9 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\FoodItem;
 use App\Models\Order;
+use App\Models\Setting;
 use App\Models\User;
+use Cache;
 use DB;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -101,97 +103,148 @@ class AdminController extends Controller
         ]);
     }
 
-   public function itemReports(Request $request)
-{
-    // Filters
-    $filterType = $request->input('filterType', 'all');
-    $search = $request->input('search', '');
-    $sortBy = $request->input('sortBy', 'sold');
-    $sortDir = $request->input('sortDir', 'desc');
-    $startDate = $request->input('startDate');
-    $endDate = $request->input('endDate');
-    $pageSize = $request->input('pageSize', 10);
+    public function itemReports(Request $request)
+    {
+        // Filters
+        $filterType = $request->input('filterType', 'all');
+        $search = $request->input('search', '');
+        $sortBy = $request->input('sortBy', 'sold');
+        $sortDir = $request->input('sortDir', 'desc');
+        $startDate = $request->input('startDate');
+        $endDate = $request->input('endDate');
+        $pageSize = $request->input('pageSize', 10);
 
-    // Preload food items for category lookup
-    $foodItems = FoodItem::with('category')->get()->keyBy('id');
+        // Preload food items for category lookup
+        $foodItems = FoodItem::with('category')->get()->keyBy('id');
 
-    // Get orders, filter by date if range is selected
-    $orders = Order::with('cart')
-        ->whereNotNull('card_id')
-        ->when($startDate && $endDate, function ($q) use ($startDate, $endDate) {
-            $q->whereBetween('created_at', [$startDate, $endDate]);
-        })
-        ->orderBy('created_at', 'desc')
-        ->get();
+        // Get orders, filter by date if range is selected
+        $orders = Order::with('cart')
+            ->whereNotNull('card_id')
+            ->when($startDate && $endDate, function ($q) use ($startDate, $endDate) {
+                $q->whereBetween('created_at', [$startDate, $endDate]);
+            })
+            ->orderBy('created_at', 'desc')
+            ->get();
 
-    $data = [];
+        $data = [];
 
-    foreach ($orders as $order) {
-        $cartItems = $order->cart?->cart_items ?? [];
+        foreach ($orders as $order) {
+            $cartItems = $order->cart?->cart_items ?? [];
 
-        foreach ($cartItems as $cartItem) {
-            $food = $foodItems->get($cartItem['food_item_id']);
-            if (!$food) continue;
+            foreach ($cartItems as $cartItem) {
+                $food = $foodItems->get($cartItem['food_item_id']);
+                if (! $food) {
+                    continue;
+                }
 
-            $itemKey = $food->id; // aggregate by item, not by date
+                $itemKey = $food->id; // aggregate by item, not by date
 
-            if (!isset($data[$itemKey])) {
-                $data[$itemKey] = [
-                    'item' => $food->name,
-                    'category' => $food->category?->name ?? 'Unknown',
-                    'sold' => 0,
-                    'cancelled' => 0,
-                ];
+                if (! isset($data[$itemKey])) {
+                    $data[$itemKey] = [
+                        'item' => $food->name,
+                        'category' => $food->category?->name ?? 'Unknown',
+                        'sold' => 0,
+                        'cancelled' => 0,
+                    ];
+                }
+
+                $quantity = $cartItem['quantity'] ?? 1;
+
+                if (($cartItem['status'] ?? 'sold') === 'cancelled') {
+                    $data[$itemKey]['cancelled'] += $quantity;
+                } else {
+                    $data[$itemKey]['sold'] += $quantity;
+                }
             }
+        }
 
-            $quantity = $cartItem['quantity'] ?? 1;
+        $itemData = collect($data)->values();
 
-            if (($cartItem['status'] ?? 'sold') === 'cancelled') {
-                $data[$itemKey]['cancelled'] += $quantity;
-            } else {
-                $data[$itemKey]['sold'] += $quantity;
-            }
+        // ===== Server-side filtering =====
+        if ($filterType === 'top') {
+            $itemData = $itemData->sortByDesc('sold')->take(10);
+        } elseif ($filterType === 'cancelled') {
+            $itemData = $itemData->filter(fn ($row) => $row['cancelled'] > 0)
+                ->sortByDesc('cancelled');
+        }
+
+        if ($search) {
+            $search = strtolower($search);
+            $itemData = $itemData->filter(fn ($row) => str_contains(strtolower($row['item']), $search) ||
+                str_contains(strtolower($row['category']), $search)
+            );
+        }
+
+        // ===== Sorting =====
+        $itemData = $itemData->sortBy($sortBy, SORT_REGULAR, $sortDir === 'desc');
+
+        // ===== Pagination =====
+        $currentPage = $request->input('page', 1);
+        $total = $itemData->count();
+        $paginated = $itemData->forPage($currentPage, $pageSize)->values();
+
+        return Inertia::render('admin/reports/item', [
+            'itemData' => $paginated,
+            'total' => $total,
+            'page' => (int) $currentPage,
+            'pageSize' => (int) $pageSize,
+            'filterType' => $filterType,
+            'search' => $search,
+            'sortBy' => $sortBy,
+            'sortDir' => $sortDir,
+            'startDate' => $startDate,
+            'endDate' => $endDate,
+        ]);
+    }
+
+    public function settings()
+    {
+        try {
+            $settings = Setting::pluck('value', 'key')->toArray();
+
+            return Inertia::render('admin/settings', [
+                'settings' => $settings,
+            ]);
+        } catch (\Exception $e) {
+            return back()->withErrors('error', 'Failed To get settings');
         }
     }
 
-    $itemData = collect($data)->values();
+    public function updateSettings(Request $request)
+    {
+        try {
+            $request->validate([
+                'currency' => 'required|string|max:10',
+                'title' => 'required|string|max:255',
+                'logo' => 'nullable|image|max:2048',
+            ]);
 
-    // ===== Server-side filtering =====
-    if ($filterType === 'top') {
-        $itemData = $itemData->sortByDesc('sold')->take(10);
-    } elseif ($filterType === 'cancelled') {
-        $itemData = $itemData->filter(fn($row) => $row['cancelled'] > 0)
-                             ->sortByDesc('cancelled');
+
+            $logoPath = null;
+            if ($request->hasFile('logo')) {
+                $logoPath = $request->file('logo')->store('logos', 'public');
+                Setting::updateOrCreate(['key' => 'logo'], ['value' => $logoPath]);
+            }
+
+            Setting::updateOrCreate(
+                ['key' => 'title'],
+                ['value' => $request->title]
+            );
+
+            Setting::updateOrCreate(
+                ['key' => 'currency'],
+                ['value' => $request->currency]
+            );
+
+            // Clear and refresh settings cache
+            Cache::forget('site_settings');
+            Cache::rememberForever('site_settings', function () {
+                return Setting::pluck('value', 'key')->toArray();
+            });
+
+            return back()->with('success', 'Settings updated successfully.');
+        } catch (\Exception $e) {
+            return back()->withErrors('error', 'Failed To update settings');
+        }
     }
-
-    if ($search) {
-        $search = strtolower($search);
-        $itemData = $itemData->filter(fn($row) =>
-            str_contains(strtolower($row['item']), $search) ||
-            str_contains(strtolower($row['category']), $search)
-        );
-    }
-
-    // ===== Sorting =====
-    $itemData = $itemData->sortBy($sortBy, SORT_REGULAR, $sortDir === 'desc');
-
-    // ===== Pagination =====
-    $currentPage = $request->input('page', 1);
-    $total = $itemData->count();
-    $paginated = $itemData->forPage($currentPage, $pageSize)->values();
-
-    return Inertia::render('admin/reports/item', [
-        'itemData' => $paginated,
-        'total' => $total,
-        'page' => (int)$currentPage,
-        'pageSize' => (int)$pageSize,
-        'filterType' => $filterType,
-        'search' => $search,
-        'sortBy' => $sortBy,
-        'sortDir' => $sortDir,
-        'startDate' => $startDate,
-        'endDate' => $endDate,
-    ]);
-}
-
 }

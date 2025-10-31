@@ -42,7 +42,9 @@ class HandleInertiaRequests extends Middleware
             ...parent::share($request),
             'name' => config('app.name'),
             'quote' => ['message' => trim($message), 'author' => trim($author)],
-            'currency' => app('siteSettings')['currency'] ?? '##',
+            'currency' => app('siteSettings')['currency'] ?? '$',
+            'site_title' => app('siteSettings')['title'] ?? 'Site Title',
+            'site_logo' =>  '/storage/'. app('siteSettings')['logo'] ?? '/red-pepper-resturant.png',
             'auth' => [
                 'user' => $request->user(),
                 'roles' => $request->user() ? $request->user()->getRoleNames() : [],

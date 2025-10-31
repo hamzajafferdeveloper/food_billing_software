@@ -15,7 +15,7 @@ export default function Home({ uniqueId, foodItems }: { uniqueId: string; foodIt
         <CustomerSideBarLayout uniqueId={uniqueId}>
             <Head title="Home" />
             <CustomerSidebarHeader uniqueId={uniqueId} />
-            <AllItemSection foodItems={foodItems} />
+            <AllItemSection uniqueId={uniqueId} foodItems={foodItems} />
         </CustomerSideBarLayout>
     );
 }

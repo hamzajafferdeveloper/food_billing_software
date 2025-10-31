@@ -3,7 +3,7 @@ import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
-import { LayoutGrid, Pizza, Sofa, User2Icon, UserRound, Utensils } from 'lucide-react';
+import { LayoutGrid, Pizza, Settings, Sofa, User2Icon, UserRound, Utensils } from 'lucide-react';
 import AppLogo from '../app-logo';
 import { dashboard } from '@/routes/admin';
 import category from '@/routes/admin/food/category';
@@ -59,6 +59,11 @@ const mainNavItems: NavItem[] = [
             }
 
         ]
+    },
+    {
+        title: 'Settings',
+        href: '/admin/settings',
+        icon: Settings
     }
 ];
 

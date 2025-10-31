@@ -12,7 +12,9 @@ Route::get('/table-number={table_number}', [CustomerController::class, 'createCu
 Route::prefix('/{unique_id}')->name('customer.')->middleware(['isCustomer'])->group(function () {
     Route::get('/home', [HomeController::class, 'home'])->name( 'home');
     Route::get('/food-items', [HomeController::class, 'foodItems'])->name('food.items');
+    Route::get('/food-items/load-more', [HomeController::class, 'loadMoreFoodItems']) ->name('foodItems.loadMore');
     Route::get('/food-categories', [HomeController::class, 'foodCategories'])->name('food.categories');
+    Route::get('/food-categories/load-more', [HomeController::class, 'loadMoreFoodCategories'])->name('foodCategories.loadMore');
     Route::post('/add-to-cart', [CartController::class, 'addToCart'])->name('add.to.cart');
     Route::get('/get-cart', [CartController::class, 'getCart'])->name('get.cart');
     Route::get('/cart', function (string $unique_id) {

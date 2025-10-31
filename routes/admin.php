@@ -13,6 +13,12 @@ Route::prefix('admin/')->middleware(['auth', 'verified', 'isAdmin'])->name('admi
     Route::get('reports/sale', [AdminController::class, 'SaleReports'])->name('reports.sale');
     Route::get('reports/items', [AdminController::class, 'itemReports'])->name('reports.items');
 
+    Route::prefix('/settings')->group(function () {
+        Route::get('/', [AdminController::class, 'settings'])->name('settings');
+        Route::post('/update', [AdminController::class, 'updateSettings'])->name('settings.update');
+
+    });
+
     // Food Category Routes
     Route::prefix('food-category/')->name('food.category.')->group(function () {
         Route::get('all', [FoodCategoryController::class, 'index'])->name('index');
@@ -45,7 +51,6 @@ Route::prefix('admin/')->middleware(['auth', 'verified', 'isAdmin'])->name('admi
         Route::put('update/{id}', [UserController::class, 'update'])->name('update');
         Route::delete('delete/{id}', [UserController::class, 'destroy'])->name('destroy');
     });
-
 
     // Tables Routes
     Route::prefix('tables/')->name('table.')->group(function () {

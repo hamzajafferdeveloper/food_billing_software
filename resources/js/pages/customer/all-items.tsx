@@ -14,7 +14,7 @@ export default function AllFoodItems({ uniqueId, foodItems }: { uniqueId: string
         <CustomerSideBarLayout uniqueId={uniqueId} >
             <Head title="All Food Items" />
             <CustomerSidebarHeader uniqueId={uniqueId} />
-            <AllItemSection foodItems={foodItems} />
+            <AllItemSection foodItems={foodItems} uniqueId={uniqueId} />
         </CustomerSideBarLayout>
     );
 }
