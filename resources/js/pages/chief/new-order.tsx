@@ -125,12 +125,12 @@ export default function NewOrder() {
         );
     };
 
-    const handleServeOrder = () => {
-        if (!selectedOrder) return;
+    const handleServeOrder = (id: number) => {
+        if (!id) return;
         setServing(true);
 
         router.post(
-            `/chief/serve-order/${selectedOrder.id}`,
+            `/chief/serve-order/${id}`,
             {},
             {
                 onSuccess: () => {
@@ -176,7 +176,7 @@ export default function NewOrder() {
             {
                 onSuccess: () => {
                     toast.success('Payment Status Updated Successfully');
-                    confirmOrder(orderId);
+                    handleServeOrder(orderId);
                     setSelectedOrder(null);
                     fetchOrders();
                 },

@@ -125,7 +125,6 @@ class ChiefController extends Controller
                 ->orderBy('id', 'desc');
 
             if ($request->filled('payment_type')) {
-
                 $query->where('payment_type', $request->payment_type);
             }
 
