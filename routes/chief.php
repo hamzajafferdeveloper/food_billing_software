@@ -14,7 +14,8 @@ Route::prefix('chief/')->name('chief.')->middleware(['auth', 'verified', 'isChie
     Route::get('get-confirmed-order', [ChiefController::class, 'getConfirmOrder'])->name('get-confirmed-order');
 
     Route::get('/served-order', [ChiefController::class, 'orderServed'])->name('served-order');
-    Route::get('get-served-order', [ChiefController::class, 'getServerdOrder'])->name('get-served-order');
+    Route::get('/get-served-order', [ChiefController::class, 'getServerdOrder'])->name('get-served-order');
     Route::post('/serve-order/{id}', [ChiefController::class, 'serveOrder'])->name('serve-order');
 
+    Route::post('/update_payment_status/order_id={orderId}', [ChiefController::class, 'updatePaymentStatus'])->name('update_payment_status');
 });

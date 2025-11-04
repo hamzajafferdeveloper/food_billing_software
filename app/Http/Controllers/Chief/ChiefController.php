@@ -34,8 +34,6 @@ class ChiefController extends Controller
         try {
             $order = Order::with(['customer', 'payment', 'cart'])->findOrFail($id);
 
-
-
             $cart = $order->cart;
             $items = collect($cart->cart_items ?? [])->map(function ($item) {
                 $food = FoodItem::find($item['food_item_id']);
@@ -122,12 +120,31 @@ class ChiefController extends Controller
     public function getServerdOrder(Request $request)
     {
         try {
-            $orders = Order::with('cart', 'customer', 'payment')->where('status', 'completed')->orderBy('id', 'desc')->get();
+            $query = Order::with(['cart', 'customer', 'payment'])
+                ->where('status', 'completed')
+                ->orderBy('id', 'desc');
 
-            return response()->json(['data' => $orders], 200);
+            if ($request->filled('payment_type')) {
+
+                $query->where('payment_type', $request->payment_type);
+            }
+
+            $orders = $query->get();
+
+            return response()->json([
+                'success' => true,
+                'data' => $orders,
+            ], 200);
+
         } catch (Exception $e) {
-            // return response()->json($e);
-            Log::error($e->getMessage());
+            Log::error('Error fetching completed orders: '.$e->getMessage(), [
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to fetch orders. Please try again later.',
+            ], 500);
         }
     }
 
@@ -138,5 +155,18 @@ class ChiefController extends Controller
         $order->save();
 
         return back();
+    }
+
+    public function updatePaymentStatus(Request $request, $orderId)
+    {
+        try {
+            $order = Order::findOrFail($orderId);
+            $order->payment_status = $request->payment_status;
+            $order->save();
+
+            return back();
+        } catch (Exception $e) {
+            Log::error($e->getMessage());
+        }
     }
 }

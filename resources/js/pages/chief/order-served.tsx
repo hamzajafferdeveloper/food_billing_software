@@ -17,6 +17,7 @@ interface Order {
     total_amount: string;
     payment_status: string;
     created_at: string;
+    payment_type?: 'cash' | 'online';
     customer?: {
         unique_id: string;
         table_id: number;
@@ -57,12 +58,14 @@ export default function Dashboard() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+    const [selectedPaymentType, setSelectedPaymentType] = useState<string>('');
     const [confirmModal, setConfirmModal] = useState<{ open: boolean; id: number | null }>({ open: false, id: null }); // 👈 custom confirm dialog state
     const modalRef = useRef<HTMLDivElement | null>(null);
     const page = usePage<SharedData>();
     const { currency } = page.props;
+
     const fetchOrders = () => {
-        fetch('/chief/get-served-order')
+        fetch(`/chief/get-served-order?payment_type=${selectedPaymentType}`)
             .then((res) => {
                 if (!res.ok) throw new Error('Failed to fetch orders');
                 return res.json();
@@ -79,7 +82,7 @@ export default function Dashboard() {
         fetchOrders();
         const interval = setInterval(fetchOrders, 60000);
         return () => clearInterval(interval);
-    }, []);
+    }, [selectedPaymentType]);
 
     useEffect(() => {
         const handleClickOutside = (e: MouseEvent) => {
@@ -118,6 +121,32 @@ export default function Dashboard() {
             {/* Orders Grid */}
             <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
                 <div className="mx-auto mt-10 w-full px-5">
+                    <header className="mb-6 flex gap-4">
+                        {[
+                            { label: 'All', value: '' },
+                            { label: 'Cash', value: 'cash' },
+                            { label: 'Online', value: 'online' },
+                        ].map((btn) => (
+                            <button
+                                key={btn.value}
+                                onClick={() => setSelectedPaymentType(btn.value)}
+                                className={`relative px-6 py-2 text-sm font-semibold transition-all duration-300 ${
+                                    selectedPaymentType === btn.value
+                                        ? 'scale-105 bg-gradient-to-r  text-black shadow-lg'
+                                        : ''
+                                } `}
+                            >
+                                {btn.label}
+
+                                {/* Smooth underline animation */}
+                                <span
+                                    className={`absolute bottom-0 left-1/2 h-[2px] w-0 bg-amber-500 transition-all duration-300 ${
+                                        selectedPaymentType === btn.value ? 'w-3/4 -translate-x-1/2' : 'w-0'
+                                    }`}
+                                ></span>
+                            </button>
+                        ))}
+                    </header>
                     <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
                         {orders.length > 0 ? (
                             <>
@@ -146,13 +175,18 @@ export default function Dashboard() {
                                             <span className="font-semibold">Date:</span> {order.created_at}
                                         </p>
                                         <p className="mb-2 flex justify-between text-gray-500 dark:text-white">
-                                            <span className="font-semibold">Amount:</span> {currency}{order.total_amount}
+                                            <span className="font-semibold">Amount:</span> {currency}
+                                            {order.total_amount}
                                         </p>
                                         <p className="mb-2 flex justify-between text-gray-500 dark:text-white">
                                             <span className="font-semibold">Sender:</span> {order.payment?.sender_number}
                                         </p>
                                         <p className="flex justify-between text-gray-500 dark:text-white">
                                             <span className="font-semibold">Transaction ID:</span> {order.payment?.transaction_id}
+                                        </p>
+
+                                        <p className="mb-2 flex justify-between text-gray-500 dark:text-white">
+                                            <span className="font-semibold">Payment Type:</span> {order.payment_type}
                                         </p>
 
                                         <button
@@ -199,7 +233,8 @@ export default function Dashboard() {
                                 <span className="font-semibold">Table:</span> #{selectedOrder.customer?.table_id ?? '—'}
                             </p>
                             <p className="text-gray-600 dark:text-gray-300">
-                                <span className="font-semibold">Total Amount:</span> {currency}{selectedOrder.total_amount}
+                                <span className="font-semibold">Total Amount:</span> {currency}
+                                {selectedOrder.total_amount}
                             </p>
 
                             {/* Cart Items */}
@@ -230,7 +265,8 @@ export default function Dashboard() {
                                                             {item.food_item?.name}
                                                         </h4>
                                                         <p className="text-sm text-gray-500 dark:text-gray-400">
-                                                            Base Price: {currency}{item.food_item?.price}
+                                                            Base Price: {currency}
+                                                            {item.food_item?.price}
                                                         </p>
                                                     </div>
                                                 </div>
@@ -254,7 +290,9 @@ export default function Dashboard() {
                                                                 className="flex justify-between rounded-lg bg-gray-100 px-3 py-2 text-sm dark:bg-gray-700"
                                                             >
                                                                 <span className="text-gray-800 dark:text-gray-200">➕ {addon.name}</span>
-                                                                <span className="font-semibold text-gray-900 dark:text-white">{currency} {addon.price}</span>
+                                                                <span className="font-semibold text-gray-900 dark:text-white">
+                                                                    {currency} {addon.price}
+                                                                </span>
                                                             </div>
                                                         ))}
                                                     </div>
@@ -293,7 +331,8 @@ export default function Dashboard() {
                                             {/* ✅ Subtotal */}
                                             <div className="mt-5 flex justify-end border-t pt-3 dark:border-gray-700">
                                                 <span className="text-md font-bold text-gray-900 dark:text-white">
-                                                    Subtotal: {currency}{calculatedSubtotal}
+                                                    Subtotal: {currency}
+                                                    {calculatedSubtotal}
                                                 </span>
                                             </div>
                                         </div>

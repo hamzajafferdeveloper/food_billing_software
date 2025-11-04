@@ -19,6 +19,7 @@ interface Order {
     payment_status: string;
     created_at: string;
     waiter_id?: number;
+    payment_type?: 'cash' | 'online';
     customer?: {
         unique_id: string;
         table_id: number;
@@ -55,19 +56,19 @@ interface Order {
     waiter?: {
         id: number;
         name: string;
-    }
+    };
 }
 
 export default function NewOrder() {
     const [orders, setOrders] = useState<Order[]>([]);
     const [loading, setLoading] = useState(true);
+    const [serving, setServing] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
     const [confirmModal, setConfirmModal] = useState<{ open: boolean; id: number | null }>({ open: false, id: null }); // 👈 custom confirm dialog state
     const modalRef = useRef<HTMLDivElement | null>(null);
-        const page = usePage<SharedData>();
-        const { currency } = page.props;
-
+    const page = usePage<SharedData>();
+    const { currency } = page.props;
 
     const fetchOrders = () => {
         fetch('/chief/get-new-order')
@@ -124,6 +125,28 @@ export default function NewOrder() {
         );
     };
 
+    const handleServeOrder = () => {
+        if (!selectedOrder) return;
+        setServing(true);
+
+        router.post(
+            `/chief/serve-order/${selectedOrder.id}`,
+            {},
+            {
+                onSuccess: () => {
+                    toast.success('Order served successfully');
+                    fetchOrders();
+                    setSelectedOrder(null);
+                },
+                onError: (err) => {
+                    console.error(err);
+                    toast.error('Failed to serve order');
+                },
+                onFinish: () => setServing(false),
+            },
+        );
+    };
+
     const declineOrder = (id: number) => {
         // instead of browser confirm, open custom modal
         setConfirmModal({ open: true, id });
@@ -146,6 +169,22 @@ export default function NewOrder() {
         );
     };
 
+    const handleUpdatePaymentStatus = (orderId: number, paymentStatus: string) => {
+        router.post(
+            `/chief/update_payment_status/order_id=${orderId}`,
+            { payment_status: paymentStatus },
+            {
+                onSuccess: () => {
+                    toast.success('Payment Status Updated Successfully');
+                    confirmOrder(orderId);
+                    setSelectedOrder(null);
+                    fetchOrders();
+                },
+                onError: () => toast.error('Failed to Update Payment Status'),
+            },
+        );
+    };
+
     if (error)
         return (
             <>
@@ -164,62 +203,79 @@ export default function NewOrder() {
             <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
                 <div className="mx-auto mt-10 w-full px-5">
                     <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
-                       {orders.length > 0 ? (
-                           <>
-                            {orders.map((order) => (
-                            <div
-                                key={order.id}
-                                className="rounded-xl bg-white p-6 shadow-lg transition duration-300 hover:shadow-2xl dark:bg-gray-900"
-                            >
-                                <div className="mb-3 flex items-center justify-between">
-                                    <h2 className="text-xl font-semibold text-gray-700 dark:text-white">Table #{order.customer?.table_id ?? '—'}</h2>
-                                    <span
-                                        className={`rounded-full px-3 py-1 text-sm font-medium ${
-                                            statusColors[order.payment_status] || 'bg-gray-100 text-gray-700'
-                                        }`}
+                        {orders.length > 0 ? (
+                            <>
+                                {orders.map((order) => (
+                                    <div
+                                        key={order.id}
+                                        className="rounded-xl bg-white p-6 shadow-lg transition duration-300 hover:shadow-2xl dark:bg-gray-900"
                                     >
-                                        Payment: {order.payment_status}
-                                    </span>
-                                </div>
+                                        <div className="mb-3 flex items-center justify-between">
+                                            <h2 className="text-xl font-semibold text-gray-700 dark:text-white">
+                                                Table #{order.customer?.table_id ?? '—'}
+                                            </h2>
+                                            <span
+                                                className={`rounded-full px-3 py-1 text-sm font-medium ${
+                                                    statusColors[order.payment_status] || 'bg-gray-100 text-gray-700'
+                                                }`}
+                                            >
+                                                Payment: {order.payment_status}
+                                            </span>
+                                        </div>
 
-                                <p className="mb-2 flex justify-between text-gray-500 dark:text-white">
-                                    <span className="font-semibold">Order #:</span> {order.id}
-                                </p>
-                                <p className="mb-2 flex justify-between text-gray-500 dark:text-white">
-                                    <span className="font-semibold">Date:</span> {order.created_at}
-                                </p>
-                                <p className="mb-2 flex justify-between text-gray-500 dark:text-white">
-                                    <span className="font-semibold">Amount:</span> {currency}{order.total_amount}
-                                </p>
-                                <p className="mb-2 flex justify-between text-gray-500 dark:text-white">
-                                    <span className="font-semibold">Sender:</span> {order.payment?.sender_number ?? '—'}
-                                </p>
-                                <p className="flex justify-between text-gray-500 dark:text-white">
-                                    <span className="font-semibold">Transaction ID:</span> {order.payment?.transaction_id ?? '—'}
-                                </p>
-                                {order.waiter_id ? (
-                                    <p className="flex justify-between text-gray-500 dark:text-white">
-                                        <span className="font-semibold">Waiter ID:</span> { order.waiter?.name ?? '—' } #{ order.waiter?.id }
-                                    </p>
+                                        <p className="mb-2 flex justify-between text-gray-500 dark:text-white">
+                                            <span className="font-semibold">Order #:</span> {order.id}
+                                        </p>
+                                        <p className="mb-2 flex justify-between text-gray-500 dark:text-white">
+                                            <span className="font-semibold">Date:</span> {order.created_at}
+                                        </p>
+                                        <p className="mb-2 flex justify-between text-gray-500 dark:text-white">
+                                            <span className="font-semibold">Amount:</span> {currency}
+                                            {order.total_amount}
+                                        </p>
+                                        <p className="mb-2 flex justify-between text-gray-500 dark:text-white">
+                                            <span className="font-semibold">Sender:</span> {order.payment?.sender_number ?? '—'}
+                                        </p>
+                                        <p className="flex justify-between text-gray-500 dark:text-white">
+                                            <span className="font-semibold">Transaction ID:</span> {order.payment?.transaction_id ?? '—'}
+                                        </p>
+                                        {order.waiter_id ? (
+                                            <p className="flex justify-between text-gray-500 dark:text-white">
+                                                <span className="font-semibold">Waiter ID:</span> {order.waiter?.name ?? '—'} #{order.waiter?.id}
+                                            </p>
+                                        ) : (
+                                            <p className="flex justify-between text-gray-500 dark:text-white">
+                                                <span className="font-semibold">Order Placed By Customer</span>
+                                            </p>
+                                        )}
 
-                                ): (
-                                    <p className="flex justify-between text-gray-500 dark:text-white">
-                                        <span className="font-semibold">Order Placed By Customer</span>
-                                    </p>
-                                )}
-
-                                <button
-                                    onClick={() => viewOrderDetails(order.id)}
-                                    className="mt-4 w-full cursor-pointer rounded-lg bg-[#fce0a2] py-2 font-semibold text-[#171717] transition hover:bg-[#e4c37d]"
-                                >
-                                    View Details
-                                </button>
-                            </div>
-                        ))}
-                           </>
-                       ): (
-                        <p className="py-6 text-center font-semibold text-gray-500">No New orders found.</p>
-                       )}
+                                        {/* View Details Button */}
+                                        <div
+                                            className={
+                                                order?.payment_type === 'cash' && order?.payment_status === 'pending'
+                                                    ? 'flex justify-between gap-2'
+                                                    : 'flex flex-col'
+                                            }
+                                        >
+                                            <button
+                                                onClick={() => handleUpdatePaymentStatus(order.id, 'completed')}
+                                                className={`mt-4 cursor-pointer rounded-lg bg-[#fce0a2] py-2 font-semibold text-[#171717] transition hover:bg-[#e4c37d] ${order?.payment_type === 'cash' && order?.payment_status === 'pending' ? 'w-1/2' : 'hidden'}`}
+                                            >
+                                                Cash Paid
+                                            </button>
+                                            <button
+                                                onClick={() => viewOrderDetails(order.id)}
+                                                className={`mt-4 cursor-pointer rounded-lg bg-[#fce0a2] py-2 font-semibold text-[#171717] transition hover:bg-[#e4c37d] ${order?.payment_type === 'cash' && order?.payment_status === 'pending' ? 'w-1/2' : 'w-full'}`}
+                                            >
+                                                View Details
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </>
+                        ) : (
+                            <p className="py-6 text-center font-semibold text-gray-500">No New orders found.</p>
+                        )}
                     </div>
                 </div>
             </div>
@@ -254,7 +310,8 @@ export default function NewOrder() {
                                 <strong className="font-medium">Table:</strong> #{selectedOrder.customer?.table_id ?? '—'}
                             </p>
                             <p>
-                                <strong className="font-medium">Total:</strong> {currency}{selectedOrder.total_amount}
+                                <strong className="font-medium">Total:</strong> {currency}
+                                {selectedOrder.total_amount}
                             </p>
                             <p>
                                 <strong className="font-medium">Sender:</strong> {selectedOrder.payment?.sender_number}
@@ -314,7 +371,10 @@ export default function NewOrder() {
                                                             className="flex justify-between rounded-lg bg-gray-100 px-3 py-2 text-sm dark:bg-gray-700"
                                                         >
                                                             <span className="text-gray-800 dark:text-gray-200">➕ {addon.name}</span>
-                                                            <span className="font-semibold text-gray-900 dark:text-white">{currency}{addon.price}</span>
+                                                            <span className="font-semibold text-gray-900 dark:text-white">
+                                                                {currency}
+                                                                {addon.price}
+                                                            </span>
                                                         </div>
                                                     ))}
                                                 </div>
@@ -352,7 +412,10 @@ export default function NewOrder() {
 
                                         {/* ✅ Subtotal */}
                                         <div className="mt-5 flex justify-end border-t pt-3 dark:border-gray-700">
-                                            <span className="text-md font-bold text-gray-900 dark:text-white">Subtotal: {currency}{calculatedSubtotal}</span>
+                                            <span className="text-md font-bold text-gray-900 dark:text-white">
+                                                Subtotal: {currency}
+                                                {calculatedSubtotal}
+                                            </span>
                                         </div>
                                     </div>
                                 );
