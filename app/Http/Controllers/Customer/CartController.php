@@ -207,9 +207,14 @@ class CartController extends Controller
     /**
      * 📦 Checkout — create order, clear cart & cache
      */
-    public function checkout(Request $request, string $unique_id)
+    public function checkout(Request $request, string $unique_id, string $payment_type)
     {
         try {
+
+            if($payment_type !== 'cash' && $payment_type !== 'online'){
+                return back()->withErrors('error', 'Invalid payment type selected!');
+            }
+
             $cart = Cart::where('customer_id', $unique_id)->where('status', 'pending')->first();
 
             if (! $cart) {
@@ -249,6 +254,7 @@ class CartController extends Controller
                     'total_amount' => $items->sum('subtotal'),
                     'payment_status' => 'pending',
                     'waiter_id' => $waiter_id,
+                    'payment_type' => $payment_type,
                 ]);
 
                 // ✅ Clear Laravel cache after checkout
@@ -258,10 +264,15 @@ class CartController extends Controller
                 \Artisan::call('view:clear');
             }
 
-            return Inertia::render('customer/checkout', [
-                'order' => $order,
-                'uniqueId' => $unique_id,
-            ]);
+            if($payment_type === 'cash'){
+                return redirect()->route('customer.notification', ['unique_id' => $unique_id]);
+            } else {
+                return Inertia::render('customer/checkout', [
+                    'order' => $order,
+                    'uniqueId' => $unique_id,
+                ]);
+            }
+
         } catch (Exception $e) {
             Log::error('Checkout failed: ' . $e->getMessage());
             return back()->with('error', 'Checkout failed, please try again.');

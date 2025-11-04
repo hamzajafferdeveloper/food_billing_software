@@ -1,4 +1,6 @@
 import { CustomerSidebarHeader } from '@/components/customer/customer-sidebar-header';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import CustomerSideBarLayout from '@/layouts/customer/customer-layout';
 import { storeUniqueId } from '@/lib/utils';
 import { RootState } from '@/store';
@@ -11,6 +13,7 @@ import { toast } from 'sonner';
 
 export default function Cart({ uniqueId }: { uniqueId: string }) {
     const reduxCartItems = useSelector((state: RootState) => state.cart.items);
+    const [openPaymentTypeModal, setOpenPaymentTypeModal] = useState<boolean>(false);
     const dispatch = useDispatch();
     const [cartItems, setCartItems] = useState(reduxCartItems);
     const page = usePage<SharedData>();
@@ -106,9 +109,10 @@ export default function Cart({ uniqueId }: { uniqueId: string }) {
     };
 
     /** 💳 Checkout **/
-    const handleOnCheckOutClick = () => {
-        dispatch(clearCart());
-        router.get(`/${uniqueId}/checkout`);
+    const handleOnCheckOutClick = (selectedPaymentType: string) => {
+        // dispatch(clearCart());
+        // console.log('Selected Payment Type:', selectedPaymentType);
+        router.get(`/${uniqueId}/checkout/payment_type=${selectedPaymentType}`);
     };
 
     return (
@@ -134,11 +138,11 @@ export default function Cart({ uniqueId }: { uniqueId: string }) {
                         {cartItems.map((item) => {
                             const addonsCost = item.addons?.reduce((sum, a) => sum + Number(a.price || 0), 0) || 0;
                             const extrasCost = item.extras?.reduce((sum, e) => sum + Number(e.price || 0) * Number(e.quantity || 0), 0) || 0;
-                            const calculatedSubtotal = (Number(item.price * item.quantity) + addonsCost + extrasCost);
+                            const calculatedSubtotal = Number(item.price * item.quantity) + addonsCost + extrasCost;
 
                             return (
-                                <div key={item.id} className=''>
-                                    <div className="grid grid-cols-12 items-center px-6 py-4 transition-all hover:bg-gray-200/60 border-b border-amber-200">
+                                <div key={item.id} className="">
+                                    <div className="grid grid-cols-12 items-center border-b border-amber-200 px-6 py-4 transition-all hover:bg-gray-200/60">
                                         {/* Product */}
                                         <div className="col-span-5 flex items-center">
                                             <img
@@ -153,7 +157,10 @@ export default function Cart({ uniqueId }: { uniqueId: string }) {
                                         </div>
 
                                         {/* Price */}
-                                        <div className="col-span-2 text-center text-gray-700">{currency}{item.price}</div>
+                                        <div className="col-span-2 text-center text-gray-700">
+                                            {currency}
+                                            {item.price}
+                                        </div>
 
                                         {/* Quantity */}
                                         <div className="col-span-3 flex items-center justify-center space-x-3">
@@ -173,7 +180,10 @@ export default function Cart({ uniqueId }: { uniqueId: string }) {
                                         </div>
 
                                         {/* ✅ Updated Subtotal (includes addons + extras) */}
-                                        <div className="col-span-1 text-right font-semibold text-gray-900">{}{calculatedSubtotal.toFixed(2)}</div>
+                                        <div className="col-span-1 text-right font-semibold text-gray-900">
+                                            {}
+                                            {calculatedSubtotal.toFixed(2)}
+                                        </div>
 
                                         {/* Remove */}
                                         <div className="col-span-1 text-right">
@@ -198,7 +208,8 @@ export default function Cart({ uniqueId }: { uniqueId: string }) {
                                                             key={index}
                                                             className="rounded-md border border-yellow-300 bg-yellow-100 px-2 py-1 text-xs text-yellow-800"
                                                         >
-                                                            {addon.name} (+{currency}{addon.price})
+                                                            {addon.name} (+{currency}
+                                                            {addon.price})
                                                         </span>
                                                     ))}
                                                 </div>
@@ -216,7 +227,8 @@ export default function Cart({ uniqueId }: { uniqueId: string }) {
                                                                 {extra.name} × {extra.quantity}
                                                             </span>
                                                             <span className="font-semibold text-gray-800">
-                                                                +{currency}{(extra.price * extra.quantity).toFixed(2)}
+                                                                +{currency}
+                                                                {(extra.price * extra.quantity).toFixed(2)}
                                                             </span>
                                                         </li>
                                                     ))}
@@ -233,7 +245,8 @@ export default function Cart({ uniqueId }: { uniqueId: string }) {
                     <div className="flex items-center justify-between border-t bg-gray-400/30 px-6 py-4">
                         <span className="text-lg font-semibold">Total</span>
                         <span className="text-xl font-bold text-green-600">
-                            {currency}{cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0).toFixed(2)}
+                            {currency}
+                            {cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0).toFixed(2)}
                         </span>
                     </div>
 
@@ -246,13 +259,39 @@ export default function Cart({ uniqueId }: { uniqueId: string }) {
                             Back
                         </button>
                         <button
-                            onClick={() => handleOnCheckOutClick()}
+                            onClick={() => setOpenPaymentTypeModal(true)}
                             className="btn-primary flex w-full max-w-xs justify-center rounded-lg font-semibold shadow transition"
                         >
                             Proceed to Checkout
                         </button>
                     </div>
                 </div>
+            )}
+            {/* Payment Type Modal */}
+            {openPaymentTypeModal && (
+                <Dialog open={openPaymentTypeModal} onOpenChange={setOpenPaymentTypeModal}>
+                    <form>
+                        <DialogContent className="sm:max-w-[425px]">
+                            <DialogHeader>
+                                <DialogTitle>Select Payment Type</DialogTitle>
+                                <DialogDescription>Make changes to your profile here. Click save when you&apos;re done.</DialogDescription>
+                            </DialogHeader>
+                            <div className="grid gap-4">
+                                <Button className="btn-primary" onClick={() => handleOnCheckOutClick('cash')}>
+                                    Cash
+                                </Button>
+                                <Button className="btn-primary" onClick={() => handleOnCheckOutClick('online')}>
+                                    Online
+                                </Button>
+                            </div>
+                            <DialogFooter>
+                                <DialogClose asChild>
+                                    <Button className='w-full' variant="outline">Cancel</Button>
+                                </DialogClose>
+                            </DialogFooter>
+                        </DialogContent>
+                    </form>
+                </Dialog>
             )}
         </CustomerSideBarLayout>
     );

@@ -23,12 +23,12 @@ Route::prefix('/{unique_id}')->name('customer.')->middleware(['isCustomer'])->gr
 
     Route::post('/update-cart-item', [CartController::class, 'updateCartItem']);
     Route::post('/remove-from-cart', [CartController::class, 'removeFromCart'])->name('remove.from.cart');
-    Route::post('/update-cart-item-quantity', [CartController::class, 'updateCartQuantity'])->name('update.cart.quantity');
-    Route::get('/checkout', [CartController::class, 'checkout'])->name('checkout');
+    Route::post('/update-cart-item-quantity', action: [CartController::class, 'updateCartQuantity'])->name('update.cart.quantity');
+    Route::get('/checkout/payment_type={payment_type}', [CartController::class, 'checkout'])->name('checkout');
     Route::get('/order-status', [CartController::class, 'getOrderStatus']);
     Route::get('/notification', function (string $unique_id) {
         return Inertia::render('customer/notification', ['uniqueId' => $unique_id]);
-    });
+    })->name('notification');
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {

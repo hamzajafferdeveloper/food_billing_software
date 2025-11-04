@@ -12,7 +12,8 @@ class Order extends Model
         'total_amount',
         'payment_status',
         'status',
-        'waiter_id'
+        'waiter_id',
+        'payment_type'
     ];
 
     public function cart(){

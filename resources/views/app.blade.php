@@ -31,10 +31,10 @@
             }
         </style>
 
-        <title inertia>{{ '/storage/'. app('siteSettings')['title'] ?? 'Site Title' }}</title>
+        <title inertia>{{ app('siteSettings')['title'] ?? 'Site Title' }}</title>
 
-        <link rel="icon" href={{ asset(app('siteSettings')['logo']) ?? asset('/red-pepper-resturant.png') }} sizes="any">
-        <link rel="icon" href={{ asset(app('siteSettings')['logo']) ?? asset('/red-pepper-resturant.png') }}>
+        <link rel="icon" href={{ asset('storage/'. app('siteSettings')['logo']) ?? asset('storage/red-pepper-resturant.png') }} sizes="any">
+        <link rel="icon" href={{ asset('storage/'. app('siteSettings')['logo']) ?? asset('storage/red-pepper-resturant.png') }}>
         <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 
         <link rel="preconnect" href="https://fonts.bunny.net">
