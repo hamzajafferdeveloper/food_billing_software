@@ -16,6 +16,12 @@ class Order extends Model
         'payment_type'
     ];
 
+    protected $casts = [
+        // 👇 Automatically formats the timestamp
+        'created_at' => 'datetime:d M Y, h:i A',
+        'updated_at' => 'datetime:d M Y, h:i A',
+    ];
+
     public function cart(){
         return $this->belongsTo(Cart::class, 'card_id', 'id');
     }

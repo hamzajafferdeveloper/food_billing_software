@@ -122,6 +122,7 @@ class ChiefController extends Controller
         try {
             $query = Order::with(['cart', 'customer', 'payment'])
                 ->where('status', 'completed')
+                ->where('created_at', '>=', now()->subDay()) // ✅ Only last 24 hours
                 ->orderBy('id', 'desc');
 
             if ($request->filled('payment_type')) {
