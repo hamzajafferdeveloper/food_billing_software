@@ -111,7 +111,6 @@ export default function NewOrder() {
             .finally(() => setLoading(false));
     };
 
-
     const confirmOrder = (id: number) => {
         router.post(
             `/chief/confirm-order/${id}`,
@@ -367,7 +366,9 @@ export default function NewOrder() {
                                             </p>
 
                                             {item.instructions ? (
-                                                <p className="text-sm text-gray-500 dark:text-gray-400">{item.instructions}</p>
+                                                <p className="rounded-md bg-yellow-200 p-2 text-sm text-gray-800 dark:text-gray-400">
+                                                    {item.instructions}
+                                                </p>
                                             ) : (
                                                 <p className="text-sm text-gray-500 italic dark:text-gray-400">No Extras selected</p>
                                             )}
