@@ -45,6 +45,7 @@ interface Order {
                 price: number;
             }[];
             totalPrice?: number;
+            instructions?: string;
         }[];
     };
     payment?: {
@@ -131,9 +132,7 @@ export default function Dashboard() {
                                 key={btn.value}
                                 onClick={() => setSelectedPaymentType(btn.value)}
                                 className={`relative px-6 py-2 text-sm font-semibold transition-all duration-300 ${
-                                    selectedPaymentType === btn.value
-                                        ? 'scale-105 bg-gradient-to-r  text-black shadow-lg'
-                                        : ''
+                                    selectedPaymentType === btn.value ? 'scale-105 bg-gradient-to-r text-black shadow-lg' : ''
                                 } `}
                             >
                                 {btn.label}
@@ -274,6 +273,19 @@ export default function Dashboard() {
                                                 <span className="rounded-full bg-yellow-200 px-4 py-1 text-sm font-bold text-gray-900 dark:bg-yellow-500 dark:text-black">
                                                     Qty: {item.quantity}
                                                 </span>
+                                            </div>
+
+                                            {/* Special Instructions */}
+                                            <div className="mt-4">
+                                                <p className="mb-2 text-sm font-semibold tracking-wide text-gray-600 uppercase dark:text-gray-300">
+                                                    Special Instructions
+                                                </p>
+
+                                                {item.instructions ? (
+                                                    <p className="text-sm text-gray-500 dark:text-gray-400">{item.instructions}</p>
+                                                ) : (
+                                                    <p className="text-sm text-gray-500 italic dark:text-gray-400">No Extras selected</p>
+                                                )}
                                             </div>
 
                                             {/* ✅ Addons Section */}

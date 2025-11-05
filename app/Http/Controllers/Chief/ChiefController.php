@@ -49,6 +49,7 @@ class ChiefController extends Controller
                     ] : null,
                     'addons' => $item['addons'] ?? [],
                     'extras' => $item['extras'] ?? [],
+                    'instructions' => $item['instructions'] ?? [],
                     // 'totalPrice' => $item['totalPrice'],
                 ];
             });

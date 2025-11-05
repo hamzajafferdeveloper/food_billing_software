@@ -20,6 +20,8 @@ class CartController extends Controller
     public function addToCart(Request $request, string $unique_id)
     {
         try {
+
+
             // ✅ Validate incoming data
             $validated = $request->validate([
                 'food_item_id' => 'required|integer|exists:food_items,id',

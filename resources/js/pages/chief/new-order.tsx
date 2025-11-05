@@ -28,6 +28,7 @@ interface Order {
         id: number;
         customer_id: string;
         cart_items: {
+            instructions?: string;
             food_item_id: number;
             quantity: number;
             food_item?: {
@@ -109,6 +110,7 @@ export default function NewOrder() {
             })
             .finally(() => setLoading(false));
     };
+
 
     const confirmOrder = (id: number) => {
         router.post(
@@ -259,7 +261,7 @@ export default function NewOrder() {
                                         >
                                             <button
                                                 onClick={() => handleUpdatePaymentStatus(order.id, 'completed')}
-                                                className={`mt-4 cursor-pointer rounded-lg bg-[#fce0a2] py-2 font-semibold text-[#171717] transition hover:bg-[#e4c37d] ${order?.payment_type === 'cash' && order?.payment_status === 'pending' ? 'w-1/2' : 'hidden'}`}
+                                                className={`mt-4 cursor-pointer rounded-lg bg-green-600 py-2 font-semibold text-white transition hover:bg-green-700 ${order?.payment_type === 'cash' && order?.payment_status === 'pending' ? 'w-1/2' : 'hidden'}`}
                                             >
                                                 Cash Paid
                                             </button>
@@ -328,6 +330,7 @@ export default function NewOrder() {
                             {selectedOrder.cart?.cart_items?.map((item, idx) => {
                                 const addonsCost = item.addons?.reduce((sum, a) => sum + Number(a.price || 0), 0) || 0;
                                 const extrasCost = item.extras?.reduce((sum, e) => sum + Number(e.price || 0) * Number(e.quantity || 0), 0) || 0;
+                                console.log(item);
                                 // @ts-ignore
                                 const calculatedSubtotal = Number(item.food_item?.price * item.quantity) + addonsCost + extrasCost;
                                 return (
@@ -355,6 +358,19 @@ export default function NewOrder() {
                                             <span className="rounded-full bg-yellow-200 px-4 py-1 text-sm font-bold text-gray-900 dark:bg-yellow-500 dark:text-black">
                                                 Qty: {item.quantity}
                                             </span>
+                                        </div>
+
+                                        {/* Special Instructions */}
+                                        <div className="mt-4">
+                                            <p className="mb-2 text-sm font-semibold tracking-wide text-gray-600 uppercase dark:text-gray-300">
+                                                Special Instructions
+                                            </p>
+
+                                            {item.instructions ? (
+                                                <p className="text-sm text-gray-500 dark:text-gray-400">{item.instructions}</p>
+                                            ) : (
+                                                <p className="text-sm text-gray-500 italic dark:text-gray-400">No Extras selected</p>
+                                            )}
                                         </div>
 
                                         {/* ✅ Addons Section */}

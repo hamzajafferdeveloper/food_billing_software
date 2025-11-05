@@ -44,6 +44,7 @@ interface Order {
                 name: string;
                 price: number;
             }[];
+            instructions?: string;
             totalPrice?: number;
         }[];
     };
@@ -171,7 +172,8 @@ export default function Dashboard() {
                                             <span className="font-semibold">Date:</span> {order.created_at}
                                         </p>
                                         <p className="mb-2 flex justify-between text-gray-500 dark:text-white">
-                                            <span className="font-semibold">Amount:</span> {currency}{order.total_amount}
+                                            <span className="font-semibold">Amount:</span> {currency}
+                                            {order.total_amount}
                                         </p>
                                         <p className="mb-2 flex justify-between text-gray-500 dark:text-white">
                                             <span className="font-semibold">Sender:</span> {order.payment?.sender_number}
@@ -265,6 +267,19 @@ export default function Dashboard() {
                                                 </span>
                                             </div>
 
+                                            {/* Special Instructions */}
+                                            <div className="mt-4">
+                                                <p className="mb-2 text-sm font-semibold tracking-wide text-gray-600 uppercase dark:text-gray-300">
+                                                    Special Instructions
+                                                </p>
+
+                                                {item.instructions ? (
+                                                    <p className="text-sm text-gray-500 dark:text-gray-400">{item.instructions}</p>
+                                                ) : (
+                                                    <p className="text-sm text-gray-500 italic dark:text-gray-400">No Extras selected</p>
+                                                )}
+                                            </div>
+
                                             {/* ✅ Addons Section */}
                                             <div className="mt-4">
                                                 <p className="mb-2 text-sm font-semibold tracking-wide text-gray-600 uppercase dark:text-gray-300">
@@ -279,7 +294,10 @@ export default function Dashboard() {
                                                                 className="flex justify-between rounded-lg bg-gray-100 px-3 py-2 text-sm dark:bg-gray-700"
                                                             >
                                                                 <span className="text-gray-800 dark:text-gray-200">➕ {addon.name}</span>
-                                                                <span className="font-semibold text-gray-900 dark:text-white">{currency}{addon.price}</span>
+                                                                <span className="font-semibold text-gray-900 dark:text-white">
+                                                                    {currency}
+                                                                    {addon.price}
+                                                                </span>
                                                             </div>
                                                         ))}
                                                     </div>
@@ -318,7 +336,8 @@ export default function Dashboard() {
                                             {/* ✅ Subtotal */}
                                             <div className="mt-5 flex justify-end border-t pt-3 dark:border-gray-700">
                                                 <span className="text-md font-bold text-gray-900 dark:text-white">
-                                                    Subtotal: {currency}{calculatedSubtotal}
+                                                    Subtotal: {currency}
+                                                    {calculatedSubtotal}
                                                 </span>
                                             </div>
                                         </div>
