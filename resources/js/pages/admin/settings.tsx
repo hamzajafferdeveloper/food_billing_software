@@ -120,7 +120,7 @@ export default function SettingsPage({
                                 <Input
                                     id="currency"
                                     type="text"
-                                    placeholder="e.g. USD, EUR, PKR"
+                                    placeholder="e.g. £, ¥, €, $"
                                     value={data.currency}
                                     onChange={(e) => setData('currency', e.target.value)}
                                     className="mt-2"

@@ -19,6 +19,14 @@ export interface UserValidationErrors {
     role?: string;
 }
 
+export interface RoomValidationErrors {
+    number?: string;
+    type?: string;
+    status?: string;
+    price_per_night?: string;
+    note?: string;
+}
+
 export interface TableValidationErrors {
     table_number?: string;
 }

@@ -7,7 +7,7 @@ import { RootState } from '@/store';
 import { clearCart, setCart } from '@/store/cartSlice';
 import { SharedData } from '@/types';
 import { Head, router, usePage } from '@inertiajs/react';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'sonner';
 
@@ -17,7 +17,8 @@ export default function Cart({ uniqueId }: { uniqueId: string }) {
     const dispatch = useDispatch();
     const [cartItems, setCartItems] = useState(reduxCartItems);
     const page = usePage<SharedData>();
-    const { currency } = page.props;
+    const { currency, name } = page.props;
+    const printRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         storeUniqueId(uniqueId);
@@ -110,10 +111,73 @@ export default function Cart({ uniqueId }: { uniqueId: string }) {
 
     /** 💳 Checkout **/
     const handleOnCheckOutClick = (selectedPaymentType: string) => {
-        // dispatch(clearCart());
+
+        dispatch(clearCart());
         // console.log('Selected Payment Type:', selectedPaymentType);
         router.get(`/${uniqueId}/checkout/payment_type=${selectedPaymentType}`);
     };
+
+    /** 🧾 Print receipt function **/
+    const printReceipt = () => {
+        if (!printRef.current) return;
+
+        const printContents = printRef.current.innerHTML;
+        const printWindow = window.open('', '', 'width=900,height=600');
+        if (!printWindow) return;
+
+        printWindow.document.write(`
+            <html>
+            <head>
+                <title>Receipt</title>
+                <style>
+                    @page { size: 80mm auto; margin: 5mm; }
+                    body {
+                        font-family: 'Courier New', monospace;
+                        width: 80mm;
+                        margin: 0 auto;
+                        color: #000;
+                    }
+                    .receipt-header {
+                        text-align: center;
+                        border-bottom: 1px dashed #000;
+                        padding-bottom: 5px;
+                        margin-bottom: 10px;
+                    }
+                    .receipt-header h2 {
+                        margin: 0;
+                        font-size: 16px;
+                        font-weight: bold;
+                    }
+                    .receipt-body table {
+                        width: 100%;
+                        border-collapse: collapse;
+                        font-size: 13px;
+                    }
+                    .receipt-body th, .receipt-body td {
+                        text-align: left;
+                        padding: 2px 0;
+                    }
+                    .receipt-body tr:not(:last-child) {
+                        border-bottom: 1px dotted #ddd;
+                    }
+                    .receipt-footer {
+                        border-top: 1px dashed #000;
+                        text-align: center;
+                        font-size: 13px;
+                        margin-top: 10px;
+                        padding-top: 5px;
+                    }
+                </style>
+            </head>
+            <body>${printContents}</body>
+            </html>
+        `);
+        printWindow.document.close();
+        printWindow.focus();
+        printWindow.print();
+        printWindow.close();
+    };
+    const total = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
     return (
         <CustomerSideBarLayout uniqueId={uniqueId}>
@@ -131,6 +195,48 @@ export default function Cart({ uniqueId }: { uniqueId: string }) {
                     <div className="flex items-center justify-between border-b bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-4">
                         <h1 className="text-xl font-bold text-gray-800">Shopping Cart</h1>
                         <span className="rounded-full bg-green-100 px-3 py-1 text-sm font-semibold text-green-700">{cartItems.length} items</span>
+                    </div>
+
+                    {/* Hidden Printable Receipt */}
+                    <div ref={printRef} style={{ display: 'none' }}>
+                        <div className="receipt-header">
+                            <h2>{name}</h2>
+                            <p>Order Receipt</p>
+                            <p>Date: {new Date().toLocaleString()}</p>
+                        </div>
+
+                        <div className="receipt-body">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Item</th>
+                                        <th>Qty</th>
+                                        <th>Price</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {cartItems.map((item) => (
+                                        <tr key={item.id}>
+                                            <td>{item.name}</td>
+                                            <td>x{item.quantity}</td>
+                                            <td>
+                                                {currency}
+                                                {(item.price * item.quantity).toFixed(2)}
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div className="receipt-footer">
+                            <p>
+                                <strong>Total:</strong> {currency}
+                                {total.toFixed(2)}
+                            </p>
+                            <p>Payment: Cash</p>
+                            <p>Thank you for dining with us!</p>
+                        </div>
                     </div>
 
                     {/* Items */}
@@ -286,7 +392,9 @@ export default function Cart({ uniqueId }: { uniqueId: string }) {
                             </div>
                             <DialogFooter>
                                 <DialogClose asChild>
-                                    <Button className='w-full' variant="outline">Cancel</Button>
+                                    <Button className="w-full" variant="outline">
+                                        Cancel
+                                    </Button>
                                 </DialogClose>
                             </DialogFooter>
                         </DialogContent>

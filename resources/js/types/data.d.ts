@@ -40,3 +40,35 @@ export interface Table {
 export interface TableWithQrCode extends Table {
     qr_code: string;
 }
+
+export interface Order {
+    id: number;
+    total_amount: string;
+    payment_status: string;
+    payment_type: string;
+    created_at: string;
+    customer?: {
+        unique_id: string;
+        table_id: number;
+    };
+    cart?: {
+        id: number;
+        customer_id: string;
+        cart_items: {
+            food_item_id: number;
+            quantity: number;
+            food_item?: {
+                name: string;
+                price: number;
+                image?: string;
+            };
+            addons?: { name: string; price: number }[];
+            extras?: { name: string; price: number; quantity: number }[];
+            instructions?: string;
+        }[];
+    };
+    payment?: {
+        sender_number: string;
+        transaction_id: string;
+    };
+}

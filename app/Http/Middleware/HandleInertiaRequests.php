@@ -42,6 +42,10 @@ class HandleInertiaRequests extends Middleware
             ...parent::share($request),
             'name' => config('app.name'),
             'quote' => ['message' => trim($message), 'author' => trim($author)],
+            'flash' => [
+                'success' => $request->session()->get('success'),
+                'error' => $request->session()->get('error'),
+            ],
             'currency' => app('siteSettings')['currency'] ?? '$',
             'site_title' => app('siteSettings')['title'] ?? 'Site Title',
             'site_logo' =>  '/storage/'. app('siteSettings')['logo'] ?? '/red-pepper-resturant.png',

@@ -267,6 +267,8 @@ class CartController extends Controller
             }
 
             if($payment_type === 'cash'){
+                $order->status = 'confirmed';
+                $order->save();
                 return redirect()->route('customer.notification', ['unique_id' => $unique_id]);
             } else {
                 return Inertia::render('customer/checkout', [

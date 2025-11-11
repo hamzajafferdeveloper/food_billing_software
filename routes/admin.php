@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\FoodCategoryController;
 use App\Http\Controllers\Admin\FoodItemController;
+use App\Http\Controllers\Admin\RoomController;
 use App\Http\Controllers\Admin\TableController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\WaiterController;
@@ -59,5 +60,10 @@ Route::prefix('admin/')->middleware(['auth', 'verified', 'isAdmin'])->name('admi
         Route::post('store', [TableController::class, 'store'])->name('store');
         Route::put('update/{id}', [TableController::class, 'update'])->name('update');
         Route::delete('delete/{id}', [TableController::class, 'destroy'])->name('destroy');
+    });
+
+    Route::prefix('rooms/')->name('room.')->group(function () {
+       Route::get('all', [RoomController::class, 'index'])->name('index');
+       Route::post('store', [RoomController::class , 'store'])->name('store');
     });
 });

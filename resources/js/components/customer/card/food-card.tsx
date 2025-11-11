@@ -85,7 +85,7 @@ export default function FoodCard({ image, title, price, id, addons, extras }: Pr
                 toast.error('Something went wrong. Please try again!');
             },
             onFinish: () => {
-                console.log('Request completed!');
+                // toast.success(isAdded ? 'Cart updated successfully!' : 'Added to cart!');
             },
         });
     };

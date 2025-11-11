@@ -60,6 +60,7 @@ class ChiefController extends Controller
                     'id' => $order->id,
                     'total_amount' => $order->total_amount,
                     'payment_status' => $order->payment_status,
+                    'payment_type' => $order->payment_type,
                     'created_at' => $order->created_at,
                     'customer' => $order->customer,
                     'payment' => $order->payment,
@@ -151,11 +152,17 @@ class ChiefController extends Controller
 
     public function serveOrder($id)
     {
-        $order = Order::findOrFail($id);
-        $order->status = 'completed';
-        $order->save();
+        try {
+            $order = Order::findOrFail($id);
+            $order->status = 'completed';
+            $order->save();
 
-        return back();
+            return back()->with('success', 'Order served.');
+        } catch (Exception $e) {
+            Log::error($e->getMessage());
+
+            return back()->with('error', 'Fail to serve order.');
+        }
     }
 
     public function updatePaymentStatus(Request $request, $orderId)
@@ -165,9 +172,11 @@ class ChiefController extends Controller
             $order->payment_status = $request->payment_status;
             $order->save();
 
-            return back();
+            return back()->with('success', 'Payment status updated successfully.');
         } catch (Exception $e) {
             Log::error($e->getMessage());
+
+            return back()->with('error', 'Fail to update payment status.');
         }
     }
 }

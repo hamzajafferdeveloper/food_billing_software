@@ -1,8 +1,11 @@
 import ChiefSidebarLayout from '@/layouts/chief/chief-layout';
+import { handlePrintReceipt } from '@/lib/utils';
 import { newOrder } from '@/routes/chief';
 import { SharedData, type BreadcrumbItem } from '@/types';
-import { Head, usePage } from '@inertiajs/react';
+import { Order } from '@/types/data';
+import { Head, router, usePage } from '@inertiajs/react';
 import { useEffect, useRef, useState } from 'react';
+import { toast } from 'sonner';
 
 const breadcrumbs: BreadcrumbItem[] = [{ title: 'New Orders', href: newOrder().url }];
 
@@ -12,55 +15,12 @@ const statusColors: Record<string, string> = {
     failed: 'bg-red-100 text-red-800',
 };
 
-interface Order {
-    id: number;
-    total_amount: string;
-    payment_status: string;
-    created_at: string;
-    payment_type?: 'cash' | 'online';
-    customer?: {
-        unique_id: string;
-        table_id: number;
-    };
-    cart?: {
-        id: number;
-        customer_id: string;
-        cart_items: {
-            food_item_id: number;
-            quantity: number;
-            food_item?: {
-                name: string;
-                price: number;
-                image?: string;
-            };
-            addons?: {
-                item_id: number;
-                name: string;
-                price: number;
-            }[];
-            extras?: {
-                item_id: number;
-                quantity: number;
-                name: string;
-                price: number;
-            }[];
-            totalPrice?: number;
-            instructions?: string;
-        }[];
-    };
-    payment?: {
-        sender_number: string;
-        transaction_id: string;
-    };
-}
-
 export default function Dashboard() {
     const [orders, setOrders] = useState<Order[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
     const [selectedPaymentType, setSelectedPaymentType] = useState<string>('');
-    const [confirmModal, setConfirmModal] = useState<{ open: boolean; id: number | null }>({ open: false, id: null }); // 👈 custom confirm dialog state
     const modalRef = useRef<HTMLDivElement | null>(null);
     const page = usePage<SharedData>();
     const { currency } = page.props;
@@ -105,6 +65,44 @@ export default function Dashboard() {
             .finally(() => setLoading(false));
     };
 
+    const handleServeOrder = (id: number) => {
+        if (!id) return;
+        // setServing(true);
+
+        router.post(
+            `/chief/serve-order/${id}`,
+            {},
+            {
+                onSuccess: () => {
+                    toast.success('Order served successfully');
+                    fetchOrders();
+                    setSelectedOrder(null);
+                },
+                onError: (err) => {
+                    console.error(err);
+                    toast.error('Failed to serve order');
+                },
+                // onFinish: () => setServing(false),
+            },
+        );
+    };
+
+    const handleUpdatePaymentStatus = (orderId: number, paymentStatus: string) => {
+        router.post(
+            `/chief/update_payment_status/order_id=${orderId}`,
+            { payment_status: paymentStatus },
+            {
+                onSuccess: () => {
+                    toast.success('Payment Status Updated Successfully');
+                    handleServeOrder(orderId);
+                    setSelectedOrder(null);
+                    fetchOrders();
+                },
+                onError: () => toast.error('Failed to Update Payment Status'),
+            },
+        );
+    };
+
     if (error)
         return (
             <>
@@ -114,6 +112,11 @@ export default function Dashboard() {
                 </ChiefSidebarLayout>
             </>
         );
+
+    const printReceipt = async (order: Order) => {
+        if (!order?.id) return;
+        handlePrintReceipt(order);
+    };
 
     return (
         <ChiefSidebarLayout breadcrumbs={breadcrumbs}>
@@ -188,11 +191,32 @@ export default function Dashboard() {
                                             <span className="font-semibold">Payment Type:</span> {order.payment_type}
                                         </p>
 
-                                        <button
-                                            onClick={() => viewOrderDetails(order.id)}
-                                            className="mt-4 w-full cursor-pointer rounded-lg bg-[#fce0a2] py-2 font-semibold text-[#171717] transition hover:bg-[#e4c37d]"
+                                        {/* View Details Button */}
+                                        <div
+                                            className={`flex ${
+                                                order?.payment_type === 'cash' && order?.payment_status === 'pending'
+                                                    ? 'justify-between gap-2'
+                                                    : 'flex-col'
+                                            }`}
                                         >
-                                            View Details
+                                            <button
+                                                onClick={() => handleUpdatePaymentStatus(order.id, 'completed')}
+                                                className={`mt-4 cursor-pointer rounded-lg bg-green-600 py-2 font-semibold text-white transition hover:bg-green-700 ${order?.payment_type === 'cash' && order?.payment_status === 'pending' ? 'w-1/2' : 'hidden'}`}
+                                            >
+                                                Cash Paid
+                                            </button>
+                                            <button
+                                                onClick={() => viewOrderDetails(order.id)}
+                                                className={`mt-4 cursor-pointer rounded-lg bg-[#fce0a2] py-2 font-semibold text-[#171717] transition hover:bg-[#e4c37d] ${order?.payment_type === 'cash' && order?.payment_status === 'pending' ? 'w-1/2' : 'w-full'}`}
+                                            >
+                                                View Details
+                                            </button>
+                                        </div>
+                                        <button
+                                            onClick={() => printReceipt(order)}
+                                            className="mt-4 w-full cursor-pointer rounded-lg bg-gray-300 py-2 font-semibold text-[#171717] transition hover:bg-gray-400"
+                                        >
+                                            Print Recipt
                                         </button>
                                     </div>
                                 ))}

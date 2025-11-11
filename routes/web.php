@@ -32,7 +32,6 @@ Route::get('/', function () {
     return Inertia::render('welcome', [
         'tables' => $tables
     ]);
-
 })->name('home');
 
 require __DIR__.'/settings.php';
