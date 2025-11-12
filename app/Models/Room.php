@@ -15,4 +15,9 @@ class Room extends Model
         'created_at',
         'updated_at',
     ];
+
+    public function roomBookings()
+    {
+        return $this->hasMany(RoomBooking::class);
+    }
 }

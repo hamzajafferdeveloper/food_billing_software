@@ -71,6 +71,17 @@ Route::prefix('admin/')->middleware(['auth', 'verified', 'isManager'])->name('ad
 
     Route::prefix('rooms/')->name('room.')->group(function () {
         Route::get('all', [RoomController::class, 'index'])->name('index');
+
+        Route::prefix('booking/')->name('booking.')->group(function () {
+            Route::get('/all', [RoomController::class, 'bookingIndex'])->name('index');
+            Route::get('/get-rooms-for-booking', [RoomController::class, 'getRoomsForBooking'])->name('get-rooms-for-booking');
+            Route::get('/get-guests-for-booking', [RoomController::class, 'getGuestsForBooking'])->name('get-guests-for-booking');
+            Route::post('/create', [RoomController::class, 'createBooking'])->name('create');
+            Route::put('/update/{id}', [RoomController::class, 'updateBooking'])->name('update');
+            Route::put('/update-status/{id}', [RoomController::class, 'updateBookingStatus'])->name('update.status');
+
+        });
+
         Route::middleware('isAdmin')->group(function () {
             Route::put('update/{id}', [RoomController::class, 'update'])->name('update');
             Route::post('store', [RoomController::class, 'store'])->name('store');

@@ -32,6 +32,10 @@ export interface roomsPagination extends Pagination {
     data: Room[];
 }
 
+export interface roomBookingsPagination extends Pagination {
+    data: RoomBooking[];
+}
+
 export interface Link {
     url?: string;
     label: string;

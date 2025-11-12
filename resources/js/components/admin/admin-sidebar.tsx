@@ -3,7 +3,7 @@ import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { SharedData, type NavItem } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
-import { BedDouble, HandPlatter, LayoutGrid, Pizza, Settings, Sofa, User2Icon, UserRound, Utensils, Warehouse } from 'lucide-react';
+import { BedDouble, ChartColumn, HandPlatter, LayoutGrid, NotebookText, Pizza, Settings, Sofa, User2Icon, UserRound, Utensils, Warehouse } from 'lucide-react';
 import AppLogo from '../app-logo';
 import { dashboard } from '@/routes/admin';
 import category from '@/routes/admin/food/category';
@@ -53,7 +53,7 @@ const adminMainNavItems: NavItem[] = [
     {
         title: 'Reports',
         href: '/',
-        icon: LayoutGrid,
+        icon: ChartColumn,
         subMenu: [
             {
                 title: 'Sales Report',
@@ -94,6 +94,11 @@ const managerMainNavItems: NavItem[] = [
         title: 'Room',
         href: room.index().url,
         icon: BedDouble
+    },
+    {
+        title: 'Rooms Booking',
+        href: room.booking.index().url,
+        icon: NotebookText
     },
 ];
 

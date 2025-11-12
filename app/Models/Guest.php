@@ -14,4 +14,9 @@ class Guest extends Model
         'document_type',
         'document_number',
     ];
+
+    public function roomBookings()
+    {
+        return $this->hasMany(RoomBooking::class);
+    }
 }

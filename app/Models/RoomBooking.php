@@ -13,5 +13,16 @@ class RoomBooking extends Model
         'check_in',
         'check_out',
         'total_amount',
+        'expected_days',
     ];
+
+    public function room()
+    {
+        return $this->belongsTo(Room::class);
+    }
+
+    public function guest()
+    {
+        return $this->belongsTo(Guest::class);
+    }
 }

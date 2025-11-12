@@ -30,7 +30,7 @@ const PaginationLink = ({ pagination, currentPageLink }: { pagination: Paginatio
                         <ChevronDown className="ml-2 h-4 w-4" />
                         </DropdownMenuTrigger>
                     <DropdownMenuContent>
-                        {[3, 5, 10, 15, 20, 25].map((perPage) => (
+                        {[10, 15, 20, 25].map((perPage) => (
                             <DropdownMenuItem key={perPage} onClick={() => handlePageClick(perPage)}>
                                 {perPage}
                             </DropdownMenuItem>

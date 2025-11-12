@@ -52,11 +52,38 @@ export interface User {
 
 export interface Room {
     id: number;
-    number: number;
+    number: string;
     type: string;
     status: string;
     price_per_night: number;
     note: string;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface RoomBooking {
+    id: number;
+    room_id: number;
+    guest_id: number;
+    status: string;
+    check_in: string;
+    check_out: string;
+    expected_days: number;
+    room: Room;
+    guest: Guest;
+    total_amount: number;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface Guest {
+    id: number;
+    name: string;
+    email: string;
+    address: string;
+    phone_number: string;
+    document_type: string;
+    document_number: string;
     created_at: string;
     updated_at: string;
 }
