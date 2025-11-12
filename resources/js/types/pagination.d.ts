@@ -1,4 +1,4 @@
-import { User } from '.';
+import { Room, User } from '.';
 import { FoodItem } from './data';
 
 export interface Pagination {
@@ -26,6 +26,10 @@ export interface FoodItemPagination extends Pagination {
 
 export interface UserPagination extends Pagination {
     data: User[];
+}
+
+export interface roomsPagination extends Pagination {
+    data: Room[];
 }
 
 export interface Link {

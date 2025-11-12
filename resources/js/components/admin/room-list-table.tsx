@@ -22,82 +22,85 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import user from '@/routes/admin/user';
-import { User } from '@/types';
+import { Room, User } from '@/types';
 import { ExistingEmail, Roles } from '@/types/data';
-import { UserPagination } from '@/types/pagination';
-import { router } from '@inertiajs/react';
+import { roomsPagination } from '@/types/pagination';
 import { useState } from 'react';
-import PaginationLink from '../pagination-link';
 import EditUserModal from './modal/edit-user-modal';
+import user from '@/routes/admin/user';
+import PaginationLink from '../pagination-link';
+import room from '@/routes/admin/room';
+import EditRoomModal from './modal/edit-room-modal';
+import { router } from '@inertiajs/react';
 
 type Props = {
-    usersPagination: UserPagination;
-    roles: Roles[];
-    existingEmail: ExistingEmail[];
+    roomsPagination: roomsPagination;
 };
 
-export function UserListTable({ usersPagination, roles, existingEmail }: Props) {
-    const data = usersPagination.data;
+export function RoomListTable({ roomsPagination }: Props) {
+    const data = roomsPagination.data;
 
     const [sorting, setSorting] = useState<SortingState>([]);
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
     const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
     const [rowSelection, setRowSelection] = useState({});
-    const [selectedUser, setSelectedUser] = useState<User | null>(null);
+    const [selectedRoom, setSelectedRoom] = useState<Room | null>(null);
     const [editModalOpen, setEditModalOpen] = useState<boolean>(false);
 
-    const handleEditClick = (user: User) => {
-        setSelectedUser(user);
+    const handleEditClick = (room: Room) => {
+        setSelectedRoom(room);
         setEditModalOpen(true);
     };
 
-    const columns: ColumnDef<User>[] = [
+    const deleteRoom = async (id: number) => {
+        try {
+            router.delete(room.destroy.url(id));
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
+    const columns: ColumnDef<Room>[] = [
         {
-            accessorKey: 'name',
+            accessorKey: 'number',
             header: ({ column }) => (
                 <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}>
-                    Name
+                    Number
                     <ArrowUpDown />
                 </Button>
             ),
-            cell: ({ row }) => <div className="ml-2 lowercase">{row.getValue('name')}</div>,
+            cell: ({ row }) => <div className="ml-2 lowercase">{row.getValue('number')}</div>,
         },
         {
-            accessorKey: 'email',
+            accessorKey: 'type',
             header: ({ column }) => (
                 <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}>
-                    Email
+                    Type
                     <ArrowUpDown />
                 </Button>
             ),
-            cell: ({ row }) => <div className="ml-2 lowercase">{row.getValue('email')}</div>,
+            cell: ({ row }) => <div className="ml-2 lowercase">{row.getValue('type')}</div>,
         },
         {
-            accessorKey: 'phone_number',
+            accessorKey: 'status',
             header: ({ column }) => (
                 <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}>
-                    Phone Number
+                    Status
                     <ArrowUpDown />
                 </Button>
             ),
-            cell: ({ row }) => <div className="ml-2 lowercase">{row.getValue('phone_number')}</div>,
-        },
-        {
-            accessorKey: 'roles.name',
-            header: () => <Button variant="ghost">Role Name</Button>,
-            cell: ({ row }) => {
-                const user = row.original;
-                const role = user.roles[0];
-                const roleName = role?.name || 'N/A';
-                return <div className="ml-2 lowercase">{roleName}</div>;
-            },
+            cell: ({ row }) => <div className="ml-2 lowercase">{row.getValue('status')}</div>,
         },
         {
             id: 'actions',
             enableHiding: false,
+            header: () => (
+                <Button variant="ghost">
+                    Action
+                </Button>
+            ),
             cell: ({ row }) => {
-                const user = row.original;
+                const room = row.original;
                 return (
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
@@ -109,10 +112,10 @@ export function UserListTable({ usersPagination, roles, existingEmail }: Props) 
                         <DropdownMenuContent align="end">
                             <DropdownMenuLabel>Actions</DropdownMenuLabel>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem className="cursor-pointer" onClick={() => handleEditClick(user)}>
+                            <DropdownMenuItem className="cursor-pointer" onClick={() => handleEditClick(room)}>
                                 Edit
                             </DropdownMenuItem>
-                            <DropdownMenuItem className="cursor-pointer" onClick={() => deleteUser(user.id)}>
+                            <DropdownMenuItem className="cursor-pointer" onClick={() => deleteRoom(room.id)}>
                                 Delete
                             </DropdownMenuItem>
                         </DropdownMenuContent>
@@ -141,13 +144,6 @@ export function UserListTable({ usersPagination, roles, existingEmail }: Props) 
         },
     });
 
-    const deleteUser = (id: number) => {
-        try {
-            router.delete(user.destroy.url(id));
-        } catch (error) {
-            console.error(error);
-        }
-    };
 
     return (
         <div className="w-full">
@@ -183,15 +179,13 @@ export function UserListTable({ usersPagination, roles, existingEmail }: Props) 
                     </TableBody>
                 </Table>
             </div>
-            <PaginationLink pagination={usersPagination} currentPageLink={user.index().url} />
+            <PaginationLink pagination={roomsPagination} currentPageLink={room.index().url} />
 
-            {selectedUser && (
-                <EditUserModal
+            {selectedRoom && (
+                <EditRoomModal
                     onOpen={editModalOpen}
                     onOpenChange={setEditModalOpen}
-                    roles={roles}
-                    existingEmail={existingEmail}
-                    prevData={selectedUser}
+                    prevData={selectedRoom}
                 />
             )}
         </div>

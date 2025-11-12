@@ -1,8 +1,10 @@
 import IndexPageHeader from '@/components/admin/index-page-header';
 import CreateRoomModal from '@/components/admin/modal/create-room-modal';
+import { RoomListTable } from '@/components/admin/room-list-table';
 import AdminSidebarLayout from '@/layouts/admin/admin-layout';
 import room from '@/routes/admin/room';
 import { SharedData, type BreadcrumbItem } from '@/types';
+import { roomsPagination } from '@/types/pagination';
 import { Head, usePage } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
@@ -14,7 +16,7 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-export default function Tables() {
+export default function Tables({ roomsPagination, filters  }: { roomsPagination: roomsPagination, filters: any }) {
     const { flash } = usePage<SharedData>().props as any;
 
     useEffect(() => {
@@ -27,7 +29,7 @@ export default function Tables() {
     }, [flash]);
 
     const [onCreateModalOpen, setOnCreateModalOpen] = useState<boolean>(false);
-    const [searchValue, setSearchValue] = useState<string>('');
+    const [searchValue, setSearchValue] = useState<string>(filters.search || '');
 
     return (
         <AdminSidebarLayout breadcrumbs={breadcrumbs}>
@@ -44,7 +46,7 @@ export default function Tables() {
                     searchValue={searchValue}
                     setSearchValue={setSearchValue}
                 />
-                {/* <UserListTable usersPagination={usersPagination} roles={roles} existingEmail={existingEmails} /> */}
+                <RoomListTable roomsPagination={roomsPagination} />
             </div>
             {onCreateModalOpen && <CreateRoomModal onOpen={onCreateModalOpen} onOpenChange={setOnCreateModalOpen} />}
         </AdminSidebarLayout>

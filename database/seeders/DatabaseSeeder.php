@@ -18,7 +18,8 @@ class DatabaseSeeder extends Seeder
         $adminRole = Role::create(['name' => 'admin']);
         $chiefRole = Role::create(['name' => 'chief']);
         $userRole  = Role::create(['name' => 'user']);
-        Role::create(['name' => 'waiter']);
+        $waiterRole =  Role::create(['name' => 'waiter']);
+        $managerRole = Role::create(['name' => 'manager']);
 
         // Create users & assign roles
         $adminUser = User::factory()->create([
@@ -37,7 +38,18 @@ class DatabaseSeeder extends Seeder
             'name' => 'Test User',
             'email' => 'test@example.com',
         ]);
-
         $testUser->assignRole($userRole);
+
+        $waiterUser = User::factory()->create([
+            'name' => 'Waiter User',
+            'email' => 'waiter@example.com',
+        ]);
+        $waiterUser->assignRole($waiterRole);
+
+        $managerUser = User::factory()->create([
+            'name' => 'Manager User',
+            'email' => 'manager@example.com',
+        ]);
+        $managerUser->assignRole($managerRole);
     }
 }

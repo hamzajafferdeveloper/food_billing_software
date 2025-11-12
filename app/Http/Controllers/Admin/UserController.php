@@ -17,12 +17,15 @@ class UserController extends Controller
      */
     public function index(Request $request)
     {
-        $per_page = $request->input('per_page', 2);
+        $per_page = $request->input('per_page', 10);
         $search_query = $request->input('search', '');
         $authenticated_user = Auth::user();
         $existing_emails = User::select('email')->get();
 
         $users = User::where('id', '!=', $authenticated_user->id)
+            ->whereDoesntHave('roles', function ($query) {
+                $query->where('name', 'waiter'); // 👈 exclude users with waiter role
+            })
             ->with('roles')
             ->when($search_query, function ($query, $search_query) {
                 $query->where(function ($q) use ($search_query) {
@@ -123,6 +126,15 @@ class UserController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        try {
+            $user = User::findOrFail($id);
+            $user->delete();
+
+            return redirect()->back()
+                ->with('success', 'User deleted successfully.');
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', 'User not found.');
+        }
     }
 }

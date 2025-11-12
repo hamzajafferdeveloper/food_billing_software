@@ -28,7 +28,7 @@ export function NavMain({ items = [] }: { items: NavItem[] }) {
                                             tooltip={{ children: item.title }}
                                             isActive={isActive}
                                         >
-                                            <div className="flex items-center gap-2">
+                                            <div className="flex  px-2 items-center text-[16px] gap-2">
                                                 {item.icon && <item.icon className="h-4 w-4" />}
                                                 <span>{item.title}</span>
                                             </div>
@@ -61,10 +61,10 @@ export function NavMain({ items = [] }: { items: NavItem[] }) {
                                 </Collapsible>
                             ) : (
                                 // ====== Regular Single Menu Item ======
-                                <SidebarMenuButton asChild isActive={isActive} tooltip={{ children: item.title }}>
+                                <SidebarMenuButton className="hover:!bg-gray-300/30 px-4 py-2" asChild isActive={isActive} tooltip={{ children: item.title }}>
                                     <Link href={item.href} prefetch>
                                         {item.icon && <item.icon />}
-                                        <span>{item.title}</span>
+                                        <span  className='text-[16px]'>{item.title}</span>
                                     </Link>
                                 </SidebarMenuButton>
                             )}

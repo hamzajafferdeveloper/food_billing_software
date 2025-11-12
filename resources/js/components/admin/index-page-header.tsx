@@ -1,5 +1,6 @@
-import { router } from '@inertiajs/react';
-import { useEffect, useState } from 'react';
+import { SharedData } from '@/types';
+import { router, usePage } from '@inertiajs/react';
+import { useEffect } from 'react';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 
@@ -14,6 +15,7 @@ interface Props {
 }
 
 const IndexPageHeader = ({ title, btnText, onClick, baseUrl, searchPlaceHolder, searchValue, setSearchValue }: Props) => {
+    const { auth } = usePage<SharedData>().props;
 
     useEffect(() => {
         if (searchValue) {
@@ -23,16 +25,23 @@ const IndexPageHeader = ({ title, btnText, onClick, baseUrl, searchPlaceHolder, 
         }
     }, [searchValue]);
     return (
-        <header className="mb-4 md:flex items-center w-full justify-between">
-            <div className="flex items-center gap-4 w-full">
+        <header className="mb-4 w-full items-center px-4 py-2 rounded-2xl justify-between md:flex">
+            <div className="flex w-full items-center gap-4">
                 <h1 className="text-xl font-medium">{title}</h1>
                 {setSearchValue && (
-                    <Input placeholder={searchPlaceHolder} value={searchValue} onChange={(e) => setSearchValue(e.target.value)} className="max-w-sm" />
+                    <Input
+                        placeholder={searchPlaceHolder}
+                        value={searchValue}
+                        onChange={(e) => setSearchValue(e.target.value)}
+                        className="max-w-sm"
+                    />
                 )}
             </div>
-            <Button className="cursor-pointer" onClick={onClick}>
-                {btnText}
-            </Button>
+            {auth && auth.roles.includes('admin') && (
+                <Button className="cursor-pointer" onClick={onClick}>
+                    {btnText}
+                </Button>
+            )}
         </header>
     );
 };

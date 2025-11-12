@@ -1,8 +1,8 @@
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
-import { type NavItem } from '@/types';
-import { Link } from '@inertiajs/react';
+import { SharedData, type NavItem } from '@/types';
+import { Link, usePage } from '@inertiajs/react';
 import { BedDouble, HandPlatter, LayoutGrid, Pizza, Settings, Sofa, User2Icon, UserRound, Utensils, Warehouse } from 'lucide-react';
 import AppLogo from '../app-logo';
 import { dashboard } from '@/routes/admin';
@@ -14,7 +14,7 @@ import waiter from '@/routes/admin/waiter';
 import { items, sale } from '@/routes/admin/reports';
 import room from '@/routes/admin/room';
 
-const mainNavItems: NavItem[] = [
+const adminMainNavItems: NavItem[] = [
     {
         title: 'Dashboard',
         href: dashboard().url,
@@ -73,7 +73,33 @@ const mainNavItems: NavItem[] = [
     },
 ];
 
+
+const managerMainNavItems: NavItem[] = [
+    {
+        title: 'Dashboard',
+        href: dashboard().url,
+        icon: LayoutGrid,
+    },
+    {
+        title: 'Food Categories',
+        href: category.index().url,
+        icon: Utensils,
+    },
+    {
+        title: 'Food Items',
+        href: item.index().url,
+        icon: Pizza,
+    },
+    {
+        title: 'Room',
+        href: room.index().url,
+        icon: BedDouble
+    },
+];
+
+
 export function AdminSidebar() {
+    const { auth } = usePage<SharedData>().props;
     return (
         <Sidebar collapsible="icon" variant="inset">
             <SidebarHeader>
@@ -89,11 +115,10 @@ export function AdminSidebar() {
             </SidebarHeader>
 
             <SidebarContent>
-                <NavMain items={mainNavItems} />
+                <NavMain items={auth && auth.roles.includes('admin') ? adminMainNavItems : managerMainNavItems} />
             </SidebarContent>
 
             <SidebarFooter>
-                <NavUser />
             </SidebarFooter>
         </Sidebar>
     );

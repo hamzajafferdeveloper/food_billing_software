@@ -49,3 +49,14 @@ export interface User {
 
     [key: string]: unknown; // This allows for additional properties...
 }
+
+export interface Room {
+    id: number;
+    number: number;
+    type: string;
+    status: string;
+    price_per_night: number;
+    note: string;
+    created_at: string;
+    updated_at: string;
+}

@@ -22,12 +22,12 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { User } from '@/types';
-import { ExistingEmail, Roles } from '@/types/data';
-import { UserPagination } from '@/types/pagination';
-import { useState } from 'react';
-import EditUserModal from './modal/edit-user-modal';
 import user from '@/routes/admin/user';
+import { User } from '@/types';
+import { ExistingEmail } from '@/types/data';
+import { UserPagination } from '@/types/pagination';
+import { router } from '@inertiajs/react';
+import { useState } from 'react';
 import PaginationLink from '../pagination-link';
 import EditWaiterModal from './modal/edit-waiter-modal';
 
@@ -111,7 +111,7 @@ export function WaiterListTable({ usersPagination, existingEmail }: Props) {
                             <DropdownMenuItem className="cursor-pointer" onClick={() => handleEditClick(user)}>
                                 Edit
                             </DropdownMenuItem>
-                            <DropdownMenuItem className="cursor-pointer" onClick={() => console.log('Delete user:', user.id)}>
+                            <DropdownMenuItem className="cursor-pointer" onClick={() => deleteWaiter(user.id)}>
                                 Delete
                             </DropdownMenuItem>
                         </DropdownMenuContent>
@@ -139,6 +139,14 @@ export function WaiterListTable({ usersPagination, existingEmail }: Props) {
             rowSelection,
         },
     });
+
+    const deleteWaiter = (id: number) => {
+        try {
+            router.delete(user.destroy.url(id));
+        } catch (error) {
+            console.error(error);
+        }
+    };
 
     return (
         <div className="w-full">
@@ -177,12 +185,7 @@ export function WaiterListTable({ usersPagination, existingEmail }: Props) {
             <PaginationLink pagination={usersPagination} currentPageLink={user.index().url} />
 
             {selectedUser && (
-                <EditWaiterModal
-                    onOpen={editModalOpen}
-                    onOpenChange={setEditModalOpen}
-                    existingEmail={existingEmail}
-                    prevData={selectedUser}
-                />
+                <EditWaiterModal onOpen={editModalOpen} onOpenChange={setEditModalOpen} existingEmail={existingEmail} prevData={selectedUser} />
             )}
         </div>
     );

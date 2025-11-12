@@ -1,13 +1,15 @@
 import { ConfirmDialog } from '@/components/confirm-dialogbox';
 import { Card, CardFooter, CardHeader } from '@/components/ui/card';
 import category from '@/routes/admin/food/category';
-import { router } from '@inertiajs/react';
+import { SharedData } from '@/types';
+import { FoodCategory } from '@/types/data';
+import { router, usePage } from '@inertiajs/react';
 import { Pen, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import EditCategoryModal from '../modal/edit-category-modal';
-import { FoodCategory } from '@/types/data';
 
 const CategoryCard = ({ data }: { data: FoodCategory }) => {
+    const { auth } = usePage<SharedData>().props;
     const [editModalOpen, setEditModalOpen] = useState<boolean>(false);
     const [deleteModalOpen, setDeleteModalOpen] = useState<boolean>(false);
     return (
@@ -15,17 +17,22 @@ const CategoryCard = ({ data }: { data: FoodCategory }) => {
             <Card className="group relative max-w-sm overflow-hidden py-0 pb-6">
                 <CardHeader className="relative p-0">
                     {/* Image */}
-                    <img src={data.image ? ` /storage/${data.image}` : '/storage/images/default-image.png'} alt={data.name} className="h-64 w-full object-cover " />
+                    <img
+                        src={data.image ? ` /storage/${data.image}` : '/storage/images/default-image.png'}
+                        alt={data.name}
+                        className="h-64 w-full object-cover"
+                    />
 
-                    {/* Hover Icons */}
-                    <div className="absolute top-2 right-2 z-20 flex gap-2 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
-                        <button className="cursor-pointer rounded-md bg-white p-1 shadow hover:bg-gray-100">
-                            <Pen className="h-4 w-4" onClick={() => setEditModalOpen(true)} />
-                        </button>
-                        <button className="rounded-md bg-white p-1 shadow hover:bg-gray-100">
-                            <Trash2 className="h-4 w-4 text-red-500" onClick={() => setDeleteModalOpen(true)} />
-                        </button>
-                    </div>
+                    {auth && auth.roles.includes('admin') && (
+                        <div className="absolute top-2 right-2 z-20 flex gap-2 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+                            <button className="cursor-pointer rounded-md bg-white p-1 shadow hover:bg-gray-100">
+                                <Pen className="h-4 w-4" onClick={() => setEditModalOpen(true)} />
+                            </button>
+                            <button className="rounded-md bg-white p-1 shadow hover:bg-gray-100">
+                                <Trash2 className="h-4 w-4 text-red-500" onClick={() => setDeleteModalOpen(true)} />
+                            </button>
+                        </div>
+                    )}
                 </CardHeader>
 
                 <CardFooter>
