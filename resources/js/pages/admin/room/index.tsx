@@ -31,6 +31,8 @@ export default function Tables({ roomsPagination, filters  }: { roomsPagination:
     const [onCreateModalOpen, setOnCreateModalOpen] = useState<boolean>(false);
     const [searchValue, setSearchValue] = useState<string>(filters.search || '');
 
+
+
     return (
         <AdminSidebarLayout breadcrumbs={breadcrumbs}>
             <Head title="All Rooms" />

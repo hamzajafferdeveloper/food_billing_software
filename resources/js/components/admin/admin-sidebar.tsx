@@ -13,6 +13,7 @@ import table from '@/routes/admin/table';
 import waiter from '@/routes/admin/waiter';
 import { items, sale } from '@/routes/admin/reports';
 import room from '@/routes/admin/room';
+import order from '@/routes/admin/order';
 
 const adminMainNavItems: NavItem[] = [
     {
@@ -99,6 +100,11 @@ const managerMainNavItems: NavItem[] = [
         title: 'Rooms Booking',
         href: room.booking.index().url,
         icon: NotebookText
+    },
+    {
+        title: 'Order',
+        href: order.index().url,
+        icon: Utensils
     },
 ];
 

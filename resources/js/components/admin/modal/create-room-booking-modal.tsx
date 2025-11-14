@@ -161,13 +161,16 @@ const CreateRoomBookingModal = ({ onOpen, onOpenChange, title }: Props) => {
             <div className="animate-fadeIn absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity"></div>
 
             <div
-                className="animate-scaleIn relative z-10 h-full max-h-[75vh] w-full max-w-7xl transform overflow-y-auto rounded-2xl bg-white p-6 shadow-2xl transition-all"
+                className="animate-scaleIn relative z-10 h-full max-h-[75vh] w-full max-w-7xl transform overflow-y-auto rounded-2xl bg-white p-6 shadow-2xl transition-all dark:bg-gray-900"
                 onClick={(e) => e.stopPropagation()}
             >
                 {/* Header */}
                 <div className="mb-4 flex items-center justify-between border-b pb-3">
-                    <h2 className="text-lg font-semibold text-gray-800">{title ?? 'Create Room Booking'}</h2>
-                    <button onClick={() => onOpenChange(false)} className="text-xl leading-none text-gray-400 hover:text-gray-700">
+                    <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100">{title ?? 'Create Room Booking'}</h2>
+                    <button
+                        onClick={() => onOpenChange(false)}
+                        className="cursor-pointer text-xl leading-none text-gray-400 hover:text-gray-700 dark:text-gray-100 dark:hover:text-gray-300"
+                    >
                         <X />
                     </button>
                 </div>
@@ -176,21 +179,21 @@ const CreateRoomBookingModal = ({ onOpen, onOpenChange, title }: Props) => {
                 <div className="space-y-8 text-gray-700">
                     {/* Guest Section */}
                     <div>
-                        <h3 className="mb-3 border-b pb-2 text-base font-semibold text-gray-800">Guest Information</h3>
+                        <h3 className="mb-3 border-b pb-2 text-base font-semibold text-gray-800 dark:text-gray-100">Guest Information</h3>
 
                         <div className="mb-4">
                             {!showGuestFields && (
                                 <>
-                                    <label className="mb-1 block text-sm font-medium text-gray-600">Document Number</label>
+                                    <label className="mb-1 block text-sm font-medium text-gray-600 dark:text-gray-100">Document Number</label>
                                     <Popover open={openGuestPopover} onOpenChange={setOpenGuestPopover}>
                                         <PopoverTrigger asChild>
-                                            <Button variant="outline" role="combobox" className="w-full justify-between rounded-lg">
+                                            <Button variant="outline" role="combobox" className="w-full justify-between rounded-lg dark:bg-gray-900 dark:text-gray-100 ">
                                                 {documentNumber ? documentNumber : 'Search Ducument Number...'}
                                             </Button>
                                         </PopoverTrigger>
 
                                         <PopoverContent className="max-h-[400px] w-[400px] overflow-auto p-0">
-                                            <Command>
+                                            <Command className='dark:bg-gray-900'>
                                                 <CommandInput
                                                     placeholder="Search guest by document number..."
                                                     value={documentNumber}
@@ -200,21 +203,20 @@ const CreateRoomBookingModal = ({ onOpen, onOpenChange, title }: Props) => {
                                                         setShowGuestFields(false);
                                                     }}
                                                 />
-                                                {isLoadingGuest && <div className="p-3 text-sm text-gray-400">Searching...</div>}
-                                                {!isLoadingGuest && guestData.length === 0 && (
-                                                    <CommandEmpty className="p-2">
-                                                        <Button
-                                                            className="w-full"
-                                                            onClick={() => {
-                                                                setShowGuestFields(true);
-                                                                setOpenGuestPopover(false);
-                                                            }}
-                                                            variant="outline"
-                                                        >
-                                                            Add Guest
-                                                        </Button>
-                                                    </CommandEmpty>
-                                                )}
+                                                {isLoadingGuest && <div className="p-3 text-sm text-gray-400 dark:text-gray-100">Searching...</div>}
+
+                                                <CommandEmpty>
+                                                    <Button
+                                                        className="w-full"
+                                                        onClick={() => {
+                                                            setShowGuestFields(true);
+                                                            setOpenGuestPopover(false);
+                                                        }}
+                                                        variant="outline"
+                                                    >
+                                                        Add Guest
+                                                    </Button>
+                                                </CommandEmpty>
 
                                                 <CommandGroup className="!w-full">
                                                     {guestData.map((guest) => (
@@ -243,18 +245,20 @@ const CreateRoomBookingModal = ({ onOpen, onOpenChange, title }: Props) => {
                         {showGuestFields && (
                             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                                 <div>
-                                    <label className="mb-1 block text-sm font-medium text-gray-600">Guest Name</label>
+                                    <label className="mb-1 block text-sm font-medium text-gray-600 dark:text-gray-100">Guest Name</label>
                                     <Input
                                         placeholder="Enter guest name"
+                                        className="dark:text-gray-100"
                                         value={selectedGuest?.name || ''}
                                         onChange={(e) => setSelectedGuest((prev) => ({ ...prev, name: e.target.value }) as Guest)}
                                     />
                                     {errors['guest.name'] && <p className="text-sm text-red-500">{errors['guest.name']}</p>}
                                 </div>
                                 <div>
-                                    <label className="mb-1 block text-sm font-medium text-gray-600">Phone Number</label>
+                                    <label className="mb-1 block text-sm font-medium text-gray-600 dark:text-gray-100">Phone Number</label>
                                     <Input
                                         placeholder="Enter phone number"
+                                        className="dark:text-gray-100"
                                         value={selectedGuest?.phone_number || ''}
                                         onChange={(e) =>
                                             setSelectedGuest(
@@ -268,28 +272,34 @@ const CreateRoomBookingModal = ({ onOpen, onOpenChange, title }: Props) => {
                                     />
                                 </div>
                                 <div className="md:col-span-2">
-                                    <label className="mb-1 block text-sm font-medium text-gray-600">Email Address</label>
+                                    <label className="mb-1 block text-sm font-medium text-gray-600 dark:text-gray-100">Email Address</label>
                                     <Input
                                         placeholder="Enter email address"
+                                        className="dark:text-gray-100"
                                         value={selectedGuest?.email || ''}
                                         onChange={(e) => setSelectedGuest((prev) => ({ ...prev, email: e.target.value }) as Guest)}
                                     />
                                     {errors['guest.email'] && <p className="text-sm text-red-500">{errors['guest.email']}</p>}
                                 </div>
                                 <div className="md:col-span-2">
-                                    <label className="mb-1 block text-sm font-medium text-gray-600">Address</label>
+                                    <label className="mb-1 block text-sm font-medium text-gray-600 dark:text-gray-100">Address</label>
                                     <Input
+                                        className="dark:text-gray-100"
                                         placeholder="Enter address"
                                         value={selectedGuest?.address || ''}
                                         onChange={(e) => setSelectedGuest((prev) => ({ ...prev, address: e.target.value }) as Guest)}
                                     />
                                 </div>
                                 <div>
-                                    <label className="mb-1 block text-sm font-medium text-gray-600">Document Type</label>
+                                    <label className="mb-1 block text-sm font-medium text-gray-600 dark:text-gray-100">Document Type</label>
                                     <DropdownMenu>
                                         <DropdownMenuTrigger className="w-full">
-                                            <Button variant="outline" role="combobox" className="w-full justify-between rounded-lg border">
-                                                {selectedGuest?.document_type ? selectedGuest?.document_type : 'Select room...'}
+                                            <Button
+                                                variant="outline"
+                                                role="combobox"
+                                                className="w-full justify-between rounded-lg dark:bg-gray-900 dark:text-gray-100"
+                                            >
+                                                {selectedGuest?.document_type ? selectedGuest?.document_type : 'Select document type...'}
                                             </Button>
                                         </DropdownMenuTrigger>
                                         <DropdownMenuContent>
@@ -315,9 +325,10 @@ const CreateRoomBookingModal = ({ onOpen, onOpenChange, title }: Props) => {
                                     </DropdownMenu>
                                 </div>
                                 <div>
-                                    <label className="mb-1 block text-sm font-medium text-gray-600">Document Number</label>
+                                    <label className="mb-1 block text-sm font-medium text-gray-600 dark:text-gray-100">Document Number</label>
                                     <Input
                                         placeholder="Enter document number"
+                                        className="dark:text-gray-100"
                                         value={selectedGuest?.document_number || documentNumber}
                                         onChange={(e) => {
                                             setDocumentNumber(e.target.value);
@@ -336,7 +347,7 @@ const CreateRoomBookingModal = ({ onOpen, onOpenChange, title }: Props) => {
                         )}
                         {showGuestFields && (
                             <Button
-                                className="mt-2"
+                                className="mt-2 dark:border-gray-100 dark:bg-gray-900 dark:text-gray-100"
                                 onClick={() => {
                                     setShowGuestFields(false);
                                     setSelectedGuest(null);
@@ -350,24 +361,28 @@ const CreateRoomBookingModal = ({ onOpen, onOpenChange, title }: Props) => {
 
                     {/* Room Section */}
                     <div>
-                        <h3 className="mb-3 border-b pb-2 text-base font-semibold text-gray-800">Room Details</h3>
+                        <h3 className="mb-3 border-b pb-2 text-base font-semibold text-gray-800 dark:text-gray-100">Room Details</h3>
                         <div className="flex flex-col gap-2">
                             <div>
-                                <label className="mb-1 block text-sm font-medium text-gray-600">Room Number</label>
+                                <label className="mb-1 block text-sm font-medium text-gray-600 dark:text-gray-100">Room Number</label>
                                 <Popover open={openRoomPopover} onOpenChange={setOpenRoomPopover}>
                                     <PopoverTrigger asChild>
-                                        <Button variant="outline" role="combobox" className="w-full justify-between rounded-lg">
+                                        <Button
+                                            variant="outline"
+                                            role="combobox"
+                                            className="w-full justify-between rounded-lg dark:bg-gray-900 dark:text-gray-100"
+                                        >
                                             {selectedRoom ? selectedRoom.number : 'Select room...'}
                                         </Button>
                                     </PopoverTrigger>
                                     <PopoverContent className="max-h-[400px] w-[400px] overflow-auto p-0">
-                                        <Command>
+                                        <Command className="dark:bg-gray-900">
                                             <CommandInput
                                                 placeholder="Search room by number or type..."
                                                 value={searchRoomInput}
                                                 onValueChange={setSearchRoomInput}
                                             />
-                                            {isLoadingRoom && <div className="p-3 text-sm text-gray-400">Searching...</div>}
+                                            {isLoadingRoom && <div className="p-3 text-sm text-gray-400 dark:text-gray-100">Searching...</div>}
                                             {!isLoadingRoom && roomsData.length === 0 && <CommandEmpty>No rooms found.</CommandEmpty>}
                                             <CommandGroup>
                                                 {roomsData.map((room) => (
@@ -392,14 +407,20 @@ const CreateRoomBookingModal = ({ onOpen, onOpenChange, title }: Props) => {
 
                             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                                 <div>
-                                    <label className="mb-1 block text-sm font-medium text-gray-600">Check-in Date</label>
-                                    <Input type="date" value={checkInDate} onChange={(e) => setCheckInDate(e.target.value)} />
+                                    <label className="mb-1 block text-sm font-medium text-gray-600 dark:text-gray-100">Check-in Date</label>
+                                    <Input
+                                        type="date"
+                                        value={checkInDate}
+                                        className="dark:text-gray-100"
+                                        onChange={(e) => setCheckInDate(e.target.value)}
+                                    />
                                     {errors['check_in'] && <p className="text-sm text-red-500">{errors['check_in']}</p>}
                                 </div>
                                 <div>
-                                    <label className="mb-1 block text-sm font-medium text-gray-600">Check-in Time</label>
+                                    <label className="mb-1 block text-sm font-medium text-gray-600 dark:text-gray-100">Check-in Time</label>
                                     <Input
                                         type="time"
+                                        className="dark:text-gray-100"
                                         value={checkInTime}
                                         onChange={(e) => setCheckInTime(e.target.value)}
                                     />
@@ -407,9 +428,10 @@ const CreateRoomBookingModal = ({ onOpen, onOpenChange, title }: Props) => {
                                 </div>
                             </div>
                             <div>
-                                <label className="mb-1 block text-sm font-medium text-gray-600">Expected Days</label>
+                                <label className="mb-1 block text-sm font-medium text-gray-600 dark:text-gray-100">Expected Days</label>
                                 <Input
                                     type="number"
+                                    className="dark:text-gray-100"
                                     value={expectedDays}
                                     onChange={(e) => setExpectedDays(Number(e.target.value))}
                                     min={0}
@@ -422,7 +444,7 @@ const CreateRoomBookingModal = ({ onOpen, onOpenChange, title }: Props) => {
 
                 {/* Footer */}
                 <div className="mt-6 flex justify-end space-x-3 border-t pt-3">
-                    <Button onClick={() => onOpenChange(false)} variant="outline">
+                    <Button className='dark:bg-gray-900' onClick={() => onOpenChange(false)} variant="outline">
                         Cancel
                     </Button>
                     <Button onClick={handleSubmit}>Save</Button>

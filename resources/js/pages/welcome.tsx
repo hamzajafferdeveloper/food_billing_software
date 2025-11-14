@@ -16,7 +16,7 @@ export default function Welcome({ tables }: { tables: TableWithQrCode[] }) {
             <div className="flex justify-end p-4">
                 {auth.user ? (
                     <>
-                        {auth.roles.includes('admin') && (
+                        {auth.roles.includes('admin') || auth.roles.includes('manager') && (
                             <Button className="mr-2" onClick={() => router.visit('/admin/dashboard')}>
                                Admin Dashboard
                             </Button>

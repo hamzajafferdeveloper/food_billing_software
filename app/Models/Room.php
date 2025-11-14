@@ -20,4 +20,8 @@ class Room extends Model
     {
         return $this->hasMany(RoomBooking::class);
     }
+
+    public function orders(){
+        return $this->hasMany(Order::class);
+    }
 }

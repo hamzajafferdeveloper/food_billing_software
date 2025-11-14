@@ -20,7 +20,7 @@ class ChiefController extends Controller
     public function getNewOrder(Request $request)
     {
         try {
-            $orders = Order::with('cart', 'customer', 'payment', 'waiter')->where('status', 'pending')->orderBy('id', 'desc')->get();
+            $orders = Order::with('cart', 'customer', 'payment', 'waiter', 'room')->where('status', 'pending')->orderBy('id', 'desc')->get();
 
             return response()->json(['data' => $orders], 200);
         } catch (Exception $e) {
@@ -32,7 +32,7 @@ class ChiefController extends Controller
     public function getOrderDetails(string $id)
     {
         try {
-            $order = Order::with(['customer', 'payment', 'cart'])->findOrFail($id);
+            $order = Order::with(['customer', 'payment', 'cart', 'room'])->findOrFail($id);
 
             $cart = $order->cart;
             $items = collect($cart->cart_items ?? [])->map(function ($item) {
@@ -105,7 +105,7 @@ class ChiefController extends Controller
     public function getConfirmOrder(Request $request)
     {
         try {
-            $orders = Order::with('cart', 'customer', 'payment')->where('status', 'confirmed')->orderBy('id', 'desc')->get();
+            $orders = Order::with('cart', 'customer', 'payment', 'room')->where('status', 'confirmed')->orderBy('id', 'desc')->get();
 
             return response()->json(['data' => $orders], 200);
         } catch (Exception $e) {
@@ -122,13 +122,21 @@ class ChiefController extends Controller
     public function getServerdOrder(Request $request)
     {
         try {
-            $query = Order::with(['cart', 'customer', 'payment'])
+            $query = Order::with(['cart', 'customer', 'payment', 'room'])
                 ->where('status', 'completed')
                 ->where('created_at', '>=', now()->subDay()) // ✅ Only last 24 hours
                 ->orderBy('id', 'desc');
 
             if ($request->filled('payment_type')) {
-                $query->where('payment_type', $request->payment_type);
+                if($request->payment_type != 'all') {
+
+                    $query->where('payment_type', $request->payment_type)
+                    ->where('room_id',  null);
+                }
+            }
+
+            if ($request->filled('order_by')) {
+                $query->where('room_id', '!=', null);
             }
 
             $orders = $query->get();

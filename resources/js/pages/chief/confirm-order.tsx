@@ -128,7 +128,7 @@ export default function Dashboard() {
                                 >
                                     <div className="mb-3 flex items-center justify-between">
                                         <h2 className="text-xl font-semibold text-gray-700 dark:text-white">
-                                            Table #{order.customer?.table_id ?? '—'}
+                                            {order.customer?.table_id ? `Table ${order.customer?.table_id}` : `Room No: ${order.room?.number}`}
                                         </h2>
                                         <span
                                             className={`rounded-full px-3 py-1 text-sm font-medium ${

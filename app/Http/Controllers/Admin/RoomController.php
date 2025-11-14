@@ -5,7 +5,9 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Guest;
 use App\Models\Room;
+use App\Models\RoomBill;
 use App\Models\RoomBooking;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -117,7 +119,7 @@ class RoomController extends Controller
         $start_date = $request->input('from');
         $end_date = $request->input('to');
 
-        $query = RoomBooking::with('room', 'guest');
+        $query = RoomBooking::with('room', 'guest', 'roomBill')->orderBy('id', 'desc');
 
         if ($search) {
             $query->whereHas('guest', function ($q) use ($search) {
@@ -269,11 +271,22 @@ class RoomController extends Controller
 
             $checkInDateTime = date('Y-m-d H:i:s', strtotime($request->input('check_in').' '.$request->input('check_in_time')));
             // Create room booking
-            $roomBooking = RoomBooking::create([
+            $roomBooking =  RoomBooking::create([
                 'guest_id' => (int) $guest->id,
                 'room_id' => (int) $request->input('room.id'),
                 'check_in' => $checkInDateTime,
                 'expected_days' => $request->input('expected_days'),
+            ]);
+
+            RoomBill::create([
+                'room_booking_id' => $roomBooking->id,
+                'room_id' => $request->input('room.id'),
+                'guest_id' => $guest->id,
+                'food_bill' => 0,
+                'total_amount' => 0,
+                'room_bill' => 0,
+                'payment_status' => 'unpaid',
+                'status' => 'unpaid',
             ]);
 
             DB::commit();
@@ -288,13 +301,14 @@ class RoomController extends Controller
         }
     }
 
-    public function updateBooking(Request $request, $id)
+   public function updateBooking(Request $request, $id)
     {
         $request->validate([
             'guest.document_number' => 'required|string',
             'guest.name' => 'required|string',
             'room.id' => 'required|integer|exists:rooms,id',
-            'check_in_datetime' => 'required|date',
+            'check_in' => 'required|date',
+            'check_in_time' => 'required|date_format:H:i',
             'expected_days' => 'required|integer',
         ]);
 
@@ -306,50 +320,48 @@ class RoomController extends Controller
 
             // Handle guest
             $guestData = $request->input('guest');
-            $guest = Guest::where('document_number', $guestData['document_number'])->first();
+            $guest = Guest::find($roomBooking->guest_id);
 
-            if (! $guest) {
-                // Create new guest if not exists
-                $guest = Guest::create([
-                    'name' => $guestData['name'],
-                    'document_number' => $guestData['document_number'],
-                    'phone_number' => $guestData['phone_number'] ?? null,
-                    'email' => $guestData['email'] ?? null,
-                    'address' => $guestData['address'] ?? null,
-                    'document_type' => $guestData['document_type'] ?? null,
-                ]);
-            } else {
-                // Update guest details if changed
+            if ($guest) {
+                // Update existing guest
                 $guest->update([
                     'name' => $guestData['name'],
+                    'document_number' => $guestData['document_number'],
                     'phone_number' => $guestData['phone_number'] ?? $guest->phone_number,
                     'email' => $guestData['email'] ?? $guest->email,
                     'address' => $guestData['address'] ?? $guest->address,
                     'document_type' => $guestData['document_type'] ?? $guest->document_type,
                 ]);
+            } else {
+                // Guest not linked, create or find by document_number
+                $guest = Guest::firstOrCreate(
+                    ['document_number' => $guestData['document_number']],
+                    [
+                        'name' => $guestData['name'],
+                        'phone_number' => $guestData['phone_number'] ?? null,
+                        'email' => $guestData['email'] ?? null,
+                        'address' => $guestData['address'] ?? null,
+                        'document_type' => $guestData['document_type'] ?? null,
+                    ]
+                );
             }
 
-            // Handle room status if changed
+            // Handle room change
             $newRoomId = (int) $request->input('room.id');
             if ($roomBooking->room_id !== $newRoomId) {
                 // Free previous room
-                $previousRoom = Room::find($roomBooking->room_id);
-                if ($previousRoom) {
-                    $previousRoom->status = 'available';
-                    $previousRoom->save();
-                }
+                Room::where('id', $roomBooking->room_id)->update(['status' => 'available']);
 
                 // Occupy new room
-                $newRoom = Room::findOrFail($newRoomId);
-                $newRoom->status = 'occupied';
-                $newRoom->save();
+                Room::where('id', $newRoomId)->update(['status' => 'occupied']);
             }
 
+            $checkInDateTime = date('Y-m-d H:i:s', strtotime($request->input('check_in').' '.$request->input('check_in_time')));
             // Update booking
             $roomBooking->update([
                 'guest_id' => $guest->id,
                 'room_id' => $newRoomId,
-                'check_in' => date('Y-m-d H:i:s', strtotime($request->input('check_in_datetime'))),
+                'check_in' => $checkInDateTime,
                 'expected_days' => $request->input('expected_days'),
             ]);
 
@@ -358,8 +370,7 @@ class RoomController extends Controller
             return redirect()->back()->with('success', 'Room booking updated successfully.');
         } catch (Exception $e) {
             DB::rollBack();
-            \Log::error('Error updating booking: '.$e->getMessage());
-
+            \Log::error('Error updating booking: ' . $e->getMessage());
             return redirect()->back()->with('error', 'Something went wrong while updating booking.');
         }
     }
@@ -374,6 +385,27 @@ class RoomController extends Controller
             // If status is "checked_out", set check_out to now
             if ($request->status === 'checked_out') {
                 $roomBooking->check_out = now();
+
+                // Calculate total days (ensure at least 1 day)
+                $checkIn = Carbon::parse($roomBooking->check_in);
+                $checkOut = Carbon::parse($roomBooking->check_out);
+                $total_days = max($checkIn->diffInDays($checkOut), 1);
+
+                // Calculate total room amount
+                $roomBooking->total_amount = $total_days * $roomBooking->room->price_per_night;
+                $roomBooking->save();
+
+                // Find or create RoomBill record for this room + guest
+                $roomBill = RoomBill::where('room_booking_id', $roomBooking->id)->first();
+
+                // Default food bill to 0 if not set
+                $roomBill->food_bill = $roomBill->food_bill ?? 0;
+
+                // Update room and total amounts
+                $roomBill->room_bill = $roomBooking->total_amount;
+                $roomBill->total_amount = $roomBill->room_bill + $roomBill->food_bill;
+
+                $roomBill->save();
             }
 
             $roomBooking->save();
@@ -389,4 +421,73 @@ class RoomController extends Controller
             return redirect()->back()->with('error', 'Failed to update status.');
         }
     }
+
+    public function receipt(string $id)
+    {
+        try {
+            // Step 1: Get booking first
+            $roomBooking = RoomBooking::findOrFail($id);
+
+            // Step 2: Get check_in / check_out times in proper format
+            $checkIn = Carbon::parse($roomBooking->check_in)->format('Y-m-d H:i:s');
+            $checkOut = Carbon::parse($roomBooking->check_out)->format('Y-m-d H:i:s');
+
+            // Step 3: Load relations with correct order filtering
+            $roomBooking->load([
+                'guest',
+                'roomBill.room',
+                'room.orders' => function ($query) use ($checkIn, $checkOut) {
+                    $query->whereHas('cart', function ($q) use ($checkIn, $checkOut) {
+                        $q->whereBetween('created_at', [$checkIn, $checkOut]);
+                    });
+                },
+            ]);
+
+            // Step 4: Attach food item details for each cart
+            foreach ($roomBooking->room->orders as $order) {
+                $cart = $order->cart;
+                if ($cart && is_array($cart->cart_items)) {
+                    $foodItemIds = collect($cart->cart_items)->pluck('food_item_id')->unique();
+                    $foodItems = \App\Models\FoodItem::whereIn('id', $foodItemIds)->get()->keyBy('id');
+
+                    $cart->cart_items = collect($cart->cart_items)->map(function ($item) use ($foodItems) {
+                        $item['food_item'] = $foodItems[$item['food_item_id']] ?? null;
+
+                        return $item;
+                    })->toArray();
+                }
+            }
+
+            return response()->json([
+                'success' => true,
+                'data' => $roomBooking,
+            ]);
+        } catch (Exception $e) {
+            \Log::error($e->getMessage());
+
+            return response()->json([
+                'error' => 'Something went wrong',
+                'message' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    public function billPaid(Request $request, string $id){
+        try {
+            $roomBill = RoomBill::where('room_booking_id', $id)->first();
+
+            $roomBill->payment_method = 'cash';
+            $roomBill->payment_status = 'paid';
+            $roomBill->save();
+
+            return redirect()->back()->with('success', 'Bill paid successfully.');
+        } catch (Exception $e) {
+            \Log::error($e->getMessage());
+
+            return redirect()->back()->with('success', 'Failed to update status.');
+        }
+    }
+
 }
+
+

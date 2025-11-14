@@ -71,6 +71,7 @@ export interface RoomBooking {
     expected_days: number;
     room: Room;
     guest: Guest;
+    room_bill: RoomBill;
     total_amount: number;
     created_at: string;
     updated_at: string;

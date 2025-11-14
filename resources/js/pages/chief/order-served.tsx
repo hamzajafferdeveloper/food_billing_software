@@ -20,13 +20,14 @@ export default function Dashboard() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
-    const [selectedPaymentType, setSelectedPaymentType] = useState<string>('');
+    const [selectedPaymentType, setSelectedPaymentType] = useState<string>('all');
+    const [orderBy, setOrderBy] = useState<string>('');
     const modalRef = useRef<HTMLDivElement | null>(null);
     const page = usePage<SharedData>();
     const { currency } = page.props;
 
     const fetchOrders = () => {
-        fetch(`/chief/get-served-order?payment_type=${selectedPaymentType}`)
+        fetch(`/chief/get-served-order?payment_type=${selectedPaymentType}&order_by=${orderBy}`)
             .then((res) => {
                 if (!res.ok) throw new Error('Failed to fetch orders');
                 return res.json();
@@ -43,7 +44,7 @@ export default function Dashboard() {
         fetchOrders();
         const interval = setInterval(fetchOrders, 60000);
         return () => clearInterval(interval);
-    }, [selectedPaymentType]);
+    }, [selectedPaymentType, orderBy]);
 
     useEffect(() => {
         const handleClickOutside = (e: MouseEvent) => {
@@ -127,13 +128,16 @@ export default function Dashboard() {
                 <div className="mx-auto mt-10 w-full px-5">
                     <header className="mb-6 flex gap-4">
                         {[
-                            { label: 'All', value: '' },
+                            { label: 'All', value: 'all' },
                             { label: 'Cash', value: 'cash' },
                             { label: 'Online', value: 'online' },
                         ].map((btn) => (
                             <button
                                 key={btn.value}
-                                onClick={() => setSelectedPaymentType(btn.value)}
+                                onClick={() => {
+                                    setSelectedPaymentType(btn.value);
+                                    setOrderBy('');
+                                }}
                                 className={`relative px-6 py-2 text-sm font-semibold transition-all duration-300 ${
                                     selectedPaymentType === btn.value ? 'scale-105 bg-gradient-to-r text-black shadow-lg' : ''
                                 } `}
@@ -148,6 +152,24 @@ export default function Dashboard() {
                                 ></span>
                             </button>
                         ))}
+                        <button
+                                onClick={() => {
+                                    setOrderBy('room');
+                                    setSelectedPaymentType('');
+                                }}
+                                className={`relative px-6 py-2 text-sm font-semibold transition-all duration-300 ${
+                                    orderBy === 'room' ? 'scale-105 bg-gradient-to-r text-black shadow-lg' : ''
+                                } `}
+                            >
+                                Room
+
+                                {/* Smooth underline animation */}
+                                <span
+                                    className={`absolute bottom-0 left-1/2 h-[2px] w-0 bg-amber-500 transition-all duration-300 ${
+                                        orderBy === 'room' ? 'w-3/4 -translate-x-1/2' : 'w-0'
+                                    }`}
+                                ></span>
+                            </button>
                     </header>
                     <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
                         {orders.length > 0 ? (
@@ -159,7 +181,7 @@ export default function Dashboard() {
                                     >
                                         <div className="mb-3 flex items-center justify-between">
                                             <h2 className="text-xl font-semibold text-gray-700 dark:text-white">
-                                                Table #{order.customer?.table_id ?? '—'}
+                                                {order.customer?.table_id ? `Table ${order.customer?.table_id}` : `Room No: ${order.room?.number}`}
                                             </h2>
                                             <span
                                                 className={`rounded-full px-3 py-1 text-sm font-medium ${

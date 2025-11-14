@@ -88,28 +88,40 @@ export default function Tables({
         <AdminSidebarLayout breadcrumbs={breadcrumbs}>
             <Head title="All Rooms Booking" />
             <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
-                <header className="mb-4 w-full items-center justify-between rounded-2xl border px-4 py-2 xl:flex">
-                    <div className="flex w-full items-center gap-4">
-                        <h1 className="text-lg font-medium xl:text-xl">All Rooms Booking</h1>
+                <header className="w-full rounded-2xl border px-4 py-3 space-y-4 gap-2 md:space-y-0 xl:flex md:items-center md:justify-between">
+                    {/* 🔹 Title + Search */}
+                    <div className="w-full space-y-3 md:flex md:items-center md:gap-4 md:space-y-0">
+                        <h1 className="text-lg w-fit font-medium md:text-xl">All Rooms Booking</h1>
+
                         <Input
                             placeholder="Search Booking by room or guest details..."
                             value={searchValue}
                             type="search"
                             onChange={(e) => setSearchValue(e.target.value)}
-                            className="w-full xl:w-xs"
+                            className="w-full xl:w-80"
                         />
                     </div>
 
-                    <div className="mt-3 flex gap-3 xl:mt-0">
-                        {/* 🔹 Status Filter */}
+                    {/* 🔹 Filters Area */}
+                    <div className="flex w-full mt-3 xl:mt-0 flex-wrap gap-3">
+
+                        {/* Status Filter */}
                         <DropdownMenu>
-                            <DropdownMenuTrigger className="w-[150px]">
-                                <Button variant="outline" role="combobox" className="w-full cursor-pointer justify-between rounded-lg border">
+                            <DropdownMenuTrigger className="w-full sm:w-[180px]">
+                                <Button
+                                    variant="outline"
+                                    role="combobox"
+                                    className="w-full cursor-pointer justify-between rounded-lg border"
+                                >
                                     {status ? (
                                         <div className="flex items-center gap-2">
                                             <div
                                                 className={`h-2 w-2 rounded-full ${
-                                                    status === 'active' ? 'bg-blue-500' : status === 'checked_out' ? 'bg-green-500' : 'bg-red-500'
+                                                    status === 'active'
+                                                        ? 'bg-blue-500'
+                                                        : status === 'checked_out'
+                                                        ? 'bg-green-500'
+                                                        : 'bg-red-500'
                                                 }`}
                                             />
                                             {status}
@@ -119,21 +131,29 @@ export default function Tables({
                                     )}
                                 </Button>
                             </DropdownMenuTrigger>
+
                             <DropdownMenuContent>
                                 <DropdownMenuItem onClick={() => handleStatusFilter('')}>All</DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => handleStatusFilter('active')}> <div className='h-2 w-2 rounded-full bg-green-500' /> Active</DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => handleStatusFilter('checked_out')}> <div className='h-2 w-2 rounded-full bg-blue-500' />Checked Out</DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => handleStatusFilter('cancelled')}> <div className='h-2 w-2 rounded-full bg-red-500' />Cancelled</DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => handleStatusFilter('active')}>
+                                    <div className="h-2 w-2 rounded-full bg-green-500" /> Active
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => handleStatusFilter('checked_out')}>
+                                    <div className="h-2 w-2 rounded-full bg-blue-500" /> Checked Out
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => handleStatusFilter('cancelled')}>
+                                    <div className="h-2 w-2 rounded-full bg-red-500" /> Cancelled
+                                </DropdownMenuItem>
                             </DropdownMenuContent>
                         </DropdownMenu>
 
-                        {/* 🔹 Room Filter */}
+                        {/* Room Filter */}
                         <Popover>
                             <PopoverTrigger asChild>
-                                <Button variant="outline" className="w-[150px] justify-between text-left">
+                                <Button variant="outline" className="w-full sm:w-[180px] justify-between text-left">
                                     {roomNumber || 'Filter By Room No'}
                                 </Button>
                             </PopoverTrigger>
+
                             <PopoverContent className="w-[200px] p-2">
                                 <Input
                                     placeholder="Search room..."
@@ -141,10 +161,15 @@ export default function Tables({
                                     onChange={(e) => setRoomSearch(e.target.value)}
                                     className="mb-2 w-full"
                                 />
+
                                 <div className="max-h-40 overflow-y-auto">
-                                    <div className="cursor-pointer rounded p-1 hover:bg-gray-100" onClick={() => handleRoomNumberFilter('')}>
+                                    <div
+                                        className="cursor-pointer rounded p-1 hover:bg-gray-100"
+                                        onClick={() => handleRoomNumberFilter('')}
+                                    >
                                         All
                                     </div>
+
                                     {rooms
                                         .filter((r) => r.number.toLowerCase().includes(roomSearch.toLowerCase()))
                                         .map((r) => (
@@ -160,15 +185,19 @@ export default function Tables({
                             </PopoverContent>
                         </Popover>
 
-                        {/* 🔹 Date Range Filter */}
+                        {/* Date Range Filter */}
                         <Popover>
                             <PopoverTrigger asChild>
                                 <Button
                                     variant="outline"
-                                    className={cn('justify-start text-left font-normal', dateRange.from != undefined && 'text-muted-foreground')}
+                                    className={cn(
+                                        'w-full sm:w-[200px] justify-start text-left font-normal',
+                                        dateRange.from && 'text-muted-foreground'
+                                    )}
                                 >
                                     <CalendarIcon className="mr-2 h-4 w-4" />
-                                    {dateRange.from != undefined && dateRange.from ? (
+
+                                    {dateRange.from ? (
                                         dateRange.to ? (
                                             <>
                                                 {format(dateRange.from, 'MMM d')} - {format(dateRange.to, 'MMM d, yyyy')}
@@ -181,17 +210,27 @@ export default function Tables({
                                     )}
                                 </Button>
                             </PopoverTrigger>
+
                             <PopoverContent align="end" className="p-0">
-                                <Calendar mode="range" numberOfMonths={2} selected={dateRange} onSelect={handleDateRangeChange} />
+                                <Calendar
+                                    mode="range"
+                                    numberOfMonths={2}
+                                    selected={dateRange}
+                                    onSelect={handleDateRangeChange}
+                                />
                             </PopoverContent>
                         </Popover>
 
-                        {/* 🔹 Create Booking */}
-                        <Button className="cursor-pointer" onClick={() => setOnCreateModalOpen(true)}>
+                        {/* Create Booking */}
+                        <Button
+                            className="w-full sm:w-auto cursor-pointer"
+                            onClick={() => setOnCreateModalOpen(true)}
+                        >
                             Create New Booking
                         </Button>
                     </div>
                 </header>
+
 
                 <RoomBookingTable roomBookingsPagination={roomBookingsPagination} />
             </div>

@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\FoodCategoryController;
 use App\Http\Controllers\Admin\FoodItemController;
+use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\RoomController;
 use App\Http\Controllers\Admin\TableController;
 use App\Http\Controllers\Admin\UserController;
@@ -68,10 +69,16 @@ Route::prefix('admin/')->middleware(['auth', 'verified', 'isManager'])->name('ad
         });
     });
 
+    Route::prefix('orders/')->name('order.')->group(function () {
+        Route::get('all', [OrderController::class, 'orderIndex'])->name('index');
+        Route::get('/search-food-item', [OrderController::class, 'searchFoodItem'])->name('search-food-item');
+        Route::post('/store', [OrderController::class, 'store'])->name('store');
+    });
 
     Route::prefix('rooms/')->name('room.')->group(function () {
         Route::get('all', [RoomController::class, 'index'])->name('index');
-
+        Route::get('receipt/{id}', [RoomController::class, 'receipt'])->name('receipt');
+        Route::post('bill-paid/{id}', [RoomController::class, 'billPaid'])->name('bill_paid');
         Route::prefix('booking/')->name('booking.')->group(function () {
             Route::get('/all', [RoomController::class, 'bookingIndex'])->name('index');
             Route::get('/get-rooms-for-booking', [RoomController::class, 'getRoomsForBooking'])->name('get-rooms-for-booking');

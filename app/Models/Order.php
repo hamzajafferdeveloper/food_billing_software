@@ -13,7 +13,8 @@ class Order extends Model
         'payment_status',
         'status',
         'waiter_id',
-        'payment_type'
+        'payment_type',
+        'room_id'
     ];
 
     protected $casts = [
@@ -35,5 +36,9 @@ class Order extends Model
     }
     public function waiter(){
         return $this->belongsTo(User::class, 'waiter_id', 'id');
+    }
+
+    public function room(){
+        return $this->belongsTo(Room::class, 'room_id', 'id');
     }
 }

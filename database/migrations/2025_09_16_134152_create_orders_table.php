@@ -14,11 +14,11 @@ return new class extends Migration
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
             // orders migration
-            $table->uuid('customer_id');
+            $table->uuid('customer_id')->nullable();
             $table->foreign('customer_id')
                 ->references('unique_id')
                 ->on('customers')
-                ->cascadeOnDelete();
+                ->nullOnDelete();
 
 
             $table->foreignId('card_id')->constrained('carts')->cascadeOnDelete();

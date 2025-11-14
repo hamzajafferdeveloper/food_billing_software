@@ -92,6 +92,16 @@ export function RoomListTable({ roomsPagination }: Props) {
             cell: ({ row }) => <div className="ml-2 lowercase">{row.getValue('status')}</div>,
         },
         {
+            accessorKey: 'price_per_night',
+            header: ({ column }) => (
+                <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}>
+                    Price Per Night
+                    <ArrowUpDown />
+                </Button>
+            ),
+            cell: ({ row }) => <div className="ml-2 lowercase">{row.getValue('price_per_night')}</div>,
+        },
+        {
             id: 'actions',
             enableHiding: false,
             header: () => (

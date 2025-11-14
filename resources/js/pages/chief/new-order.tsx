@@ -1,6 +1,7 @@
 import ChiefSidebarLayout from '@/layouts/chief/chief-layout';
 import { newOrder } from '@/routes/chief';
 import { SharedData, type BreadcrumbItem } from '@/types';
+import { Order } from '@/types/data';
 import { Head, router, usePage } from '@inertiajs/react';
 import { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
@@ -12,53 +13,6 @@ const statusColors: Record<string, string> = {
     pending: 'bg-yellow-100 text-yellow-800',
     failed: 'bg-red-100 text-red-800',
 };
-
-interface Order {
-    id: number;
-    total_amount: string;
-    payment_status: string;
-    created_at: string;
-    waiter_id?: number;
-    payment_type?: 'cash' | 'online';
-    customer?: {
-        unique_id: string;
-        table_id: number;
-    };
-    cart?: {
-        id: number;
-        customer_id: string;
-        cart_items: {
-            instructions?: string;
-            food_item_id: number;
-            quantity: number;
-            food_item?: {
-                name: string;
-                price: number;
-                image?: string;
-            };
-            addons?: {
-                item_id: number;
-                name: string;
-                price: number;
-            }[];
-            extras?: {
-                item_id: number;
-                quantity: number;
-                name: string;
-                price: number;
-            }[];
-            totalPrice?: number;
-        }[];
-    };
-    payment?: {
-        sender_number: string;
-        transaction_id: string;
-    };
-    waiter?: {
-        id: number;
-        name: string;
-    };
-}
 
 export default function NewOrder() {
     const [orders, setOrders] = useState<Order[]>([]);
@@ -213,7 +167,7 @@ export default function NewOrder() {
                                     >
                                         <div className="mb-3 flex items-center justify-between">
                                             <h2 className="text-xl font-semibold text-gray-700 dark:text-white">
-                                                Table #{order.customer?.table_id ?? '—'}
+                                                {order.customer?.table_id ? `Table ${order.customer?.table_id}` : `Room No: ${order.room?.number}`}
                                             </h2>
                                             <span
                                                 className={`rounded-full px-3 py-1 text-sm font-medium ${

@@ -45,8 +45,10 @@ export interface Order {
     id: number;
     total_amount: string;
     payment_status: string;
-    payment_type: string;
     created_at: string;
+    waiter_id?: number;
+    room_id?: number;
+    payment_type?: 'cash' | 'online';
     customer?: {
         unique_id: string;
         table_id: number;
@@ -55,6 +57,7 @@ export interface Order {
         id: number;
         customer_id: string;
         cart_items: {
+            instructions?: string;
             food_item_id: number;
             quantity: number;
             food_item?: {
@@ -62,13 +65,30 @@ export interface Order {
                 price: number;
                 image?: string;
             };
-            addons?: { name: string; price: number }[];
-            extras?: { name: string; price: number; quantity: number }[];
-            instructions?: string;
+            addons?: {
+                item_id: number;
+                name: string;
+                price: number;
+            }[];
+            extras?: {
+                item_id: number;
+                quantity: number;
+                name: string;
+                price: number;
+            }[];
+            totalPrice?: number;
         }[];
     };
+    room?: {
+        id: number;
+        number: string;
+    }
     payment?: {
         sender_number: string;
         transaction_id: string;
+    };
+    waiter?: {
+        id: number;
+        name: string;
     };
 }

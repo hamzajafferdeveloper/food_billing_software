@@ -25,4 +25,9 @@ class RoomBooking extends Model
     {
         return $this->belongsTo(Guest::class);
     }
+
+    public function roomBill()
+    {
+        return $this->hasOne(RoomBill::class, 'room_id', 'room_id');
+    }
 }
